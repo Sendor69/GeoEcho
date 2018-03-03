@@ -5,7 +5,6 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
 
 import static papaya.geoecho.R.id.rLogin;
 import static papaya.geoecho.R.id.rRegister;
@@ -26,9 +25,6 @@ public class LogReg extends AppCompatActivity implements View.OnClickListener {
         Login.setOnClickListener(this);
         Sign = (Button) findViewById(R.id.rRegister);
         Sign.setOnClickListener(this);
-
-
-
 
     }
 

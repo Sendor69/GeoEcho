@@ -1,6 +1,7 @@
 package papaya.geoecho;
 
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -43,6 +44,8 @@ public class Login extends AppCompatActivity implements View.OnClickListener {
         switch (view.getId()){
             case bLogin:
                 new UserLoginTask().execute();
+                Intent i = new Intent (this,MainActivity.class);
+                startActivity(i);
                 break;
             case tRecordar:
                 //ToDO por implementar
