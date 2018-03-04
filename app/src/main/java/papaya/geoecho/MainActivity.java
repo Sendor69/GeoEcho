@@ -1,10 +1,12 @@
 package papaya.geoecho;
 
+import android.app.ProgressDialog;
+import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.view.View;
 import android.support.design.widget.NavigationView;
+import android.support.design.widget.Snackbar;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -12,6 +14,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -39,6 +42,7 @@ public class MainActivity extends AppCompatActivity
         toggle.syncState();
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+
         navigationView.setNavigationItemSelectedListener(this);
     }
 
@@ -88,9 +92,8 @@ public class MainActivity extends AppCompatActivity
 
         } else if (id == R.id.nav_manage) {
 
-        } else if (id == R.id.nav_share) {
-
-        } else if (id == R.id.nav_send) {
+        } else if (id == R.id.nav_logOff) {
+            new UserLogoutTask().execute();
 
         }
 
@@ -98,4 +101,46 @@ public class MainActivity extends AppCompatActivity
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
+    public class UserLogoutTask extends AsyncTask<Void, Void, Boolean> {
+
+        /*Clase tonta, no hace nada */
+        UserLogoutTask() {
+
+        }
+
+        ProgressDialog mDialog = new ProgressDialog(MainActivity.this);
+
+        @Override
+        protected Boolean doInBackground(Void... params) {
+            // TODO: intenta conectarte al server y logear.
+
+            try {
+                // Simulate network access.
+                Thread.sleep(2000);
+            } catch (InterruptedException e) {
+                return false;
+            }
+
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(final Boolean success) {
+            mDialog.dismiss();
+            Intent intent = new Intent (MainActivity.this,Login.class);
+            startActivity(intent);
+        }
+
+        @Override
+        protected void onPreExecute() {
+            //Autenticando login...
+            mDialog.setMessage("Disconnecting...");
+            mDialog.show();
+        }
+    }
+
+
+
+
+
 }
