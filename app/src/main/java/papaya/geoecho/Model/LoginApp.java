@@ -1,12 +1,10 @@
 package papaya.geoecho.Model;
 
-import java.io.Serializable;
-
 /**
- * Created by Dani on 04/03/2018.
+ * Created by Dani on 05/03/2018.
  */
 
-public class LoginApp implements Serializable {
+public class LoginApp extends Packet{
 
     private String user;
     private String pass;
