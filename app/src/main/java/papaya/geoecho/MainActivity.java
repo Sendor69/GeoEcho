@@ -2,8 +2,11 @@ package papaya.geoecho;
 
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -12,8 +15,10 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -118,6 +123,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
+    /*
+    Función para enviar petición al servidor de eliminar la sessionId asignada a este usuario
+     */
     public class UserLogoutTask extends AsyncTask<Void, Void, Boolean> {
 
         /*Clase tonta, no hace nada */
@@ -157,6 +165,46 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             mDialog.show();
         }
     }
+
+    public void logout(){
+        DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                switch (which){
+                    case DialogInterface.BUTTON_POSITIVE:
+                        //Yes button clicked
+                        new UserLogoutTask().execute();
+                        break;
+
+                    case DialogInterface.BUTTON_NEGATIVE:
+                        //No button clicked
+                        break;
+                }
+            }
+        };
+
+        AlertDialog.Builder ab = new AlertDialog.Builder(MainActivity.this,R.style.CustomAlert);
+        ab.setMessage("You will finalize your session. Are you sure?").setPositiveButton("Yes", dialogClickListener)
+                .setNegativeButton("No", dialogClickListener).setTitle("Login out");
+        AlertDialog alertDialog = ab.create();
+        alertDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        alertDialog.show();
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+
+
+        switch(keyCode)
+        {
+            case KeyEvent.KEYCODE_BACK:
+                logout();
+                break;
+        }
+        return super.onKeyDown(keyCode, event);
+    }
+
+
 
 
 

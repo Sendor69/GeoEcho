@@ -16,6 +16,13 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+
 import papaya.geoecho.Model.LoginApp;
 import papaya.geoecho.Model.Response;
 
@@ -32,7 +39,7 @@ public class Login extends AppCompatActivity implements View.OnClickListener {
     private TextView forgotPass;
     private LoginApp loginData;
     private SharedPreferences sharedPref;
-    SharedPreferences.Editor editor;
+    private SharedPreferences.Editor editor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,7 +56,7 @@ public class Login extends AppCompatActivity implements View.OnClickListener {
         sharedPref = getSharedPreferences("UserData", Context.MODE_PRIVATE);
         editor = sharedPref.edit();
 
-        /*/Para Implementar en los siguientes TEA
+        /*//TODO Para Implementar en los siguientes TEA
         forgotPass = (TextView) findViewById(tRecordar);
         forgotPass.setOnClickListener(this);
         */
@@ -94,7 +101,7 @@ public class Login extends AppCompatActivity implements View.OnClickListener {
                 Thread.sleep(2000);
                 result= validateLogin(loginData);
             } catch (InterruptedException e) {
-
+                showAlert("Connection Error","Imposible to connect with server. Please try again");
             }
 
             return result;
@@ -104,13 +111,12 @@ public class Login extends AppCompatActivity implements View.OnClickListener {
         protected void onPostExecute(final Response result) {
             String session = result.getSessionID();
             if (session != null){
-                mDialog.dismiss();
                 loginData.setSessionID(session);
                 Intent i = new Intent(Login.this, MainActivity.class);
                 saveUserData(loginData);
                 startActivity(i);
             }else
-                showAlert("", "Authentication failed");
+                showAlert("", "Incorrect log in");
             mDialog.dismiss();
         }
         @Override
@@ -140,9 +146,13 @@ public class Login extends AppCompatActivity implements View.OnClickListener {
         return result;
     }
 
-
+    /*
+    Función para validar los campos user y password.
+    Los campos no pueden estar vacíos y han de contener más de 3 caracteres
+     */
     public boolean checkDataLogin(){
         Boolean validated = true;
+
         password.setError(null);
         user.setError(null);
 
@@ -173,10 +183,59 @@ public class Login extends AppCompatActivity implements View.OnClickListener {
     public boolean validPass(String pass){
         return pass.trim().length()>3;
     }
-
+    /*
+    Función para guardar la información del usuario de una actividad a otra
+     */
     private void saveUserData(LoginApp data){
         editor.putString("user",data.getUser());
         editor.putString("session",data.getSessionID());
         editor.commit();
+    }
+
+    public Response serverLogin (LoginApp data) throws Exception{
+
+        String serverUrl = "";
+        Response result = new Response();
+        URL url = new URL(serverUrl);
+        HttpURLConnection con = (HttpURLConnection) url.openConnection();
+
+        //add request header
+        con.setRequestMethod("POST");
+        con.setDoOutput(true); // para poder excribir
+        con.setDoInput(true); // para poder leer
+
+        try {
+            ObjectOutputStream objectOut = new ObjectOutputStream(con.getOutputStream());
+            objectOut.writeObject(data);
+
+        }catch (Exception e){
+
+        }
+        int responseCode = con.getResponseCode();
+
+        System.out.println("\nSending 'POST' request to URL : " + url);
+
+        //System.out.println("Post parameters : " + urlParameters);
+        System.out.println("Response Code : " + responseCode);
+
+        String inputLine;
+        StringBuilder response;
+
+        try{
+            //Como recibir la información ?
+            ObjectInputStream objectInput = new ObjectInputStream(con.getInputStream());
+
+            BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+            response = new StringBuilder();
+            while ((inputLine = in.readLine()) != null) {
+                response.append(inputLine);
+            }
+            result.setSessionID(response.toString());
+
+        }catch (Exception e){
+
+        }
+
+        return result;
     }
 }
