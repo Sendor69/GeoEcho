@@ -1,13 +1,16 @@
 package papaya.geoecho;
 
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -24,10 +27,12 @@ public class Login extends AppCompatActivity implements View.OnClickListener {
 
     //Referencias UI
 
-    Button login;
-    EditText user,password;
-    TextView forgotPass;
-    LoginApp loginData;
+    private Button login;
+    private EditText user,password;
+    private TextView forgotPass;
+    private LoginApp loginData;
+    private SharedPreferences sharedPref;
+    SharedPreferences.Editor editor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,9 +44,15 @@ public class Login extends AppCompatActivity implements View.OnClickListener {
         login.setOnClickListener(this);
         user = (EditText)findViewById(R.id.eUsername);
         password = (EditText) findViewById(R.id.ePasword);
+        loginData = new LoginApp();
+
+        sharedPref = getSharedPreferences("UserData", Context.MODE_PRIVATE);
+        editor = sharedPref.edit();
+
+        /*/Para Implementar en los siguientes TEA
         forgotPass = (TextView) findViewById(tRecordar);
         forgotPass.setOnClickListener(this);
-        loginData = new LoginApp();
+        */
 
     }
 
@@ -49,12 +60,11 @@ public class Login extends AppCompatActivity implements View.OnClickListener {
     public void onClick (View view) {
         switch (view.getId()){
             case bLogin:
-                if (checkData()){
+                if (checkDataLogin()){
                     loginData.setUser(user.getText().toString().trim());
                     loginData.setPass(password.getText().toString().trim());
                     new UserLoginTask().execute();
-                }else
-                    showAlert("Error","Fields can't be empty");
+                }
                 break;
             case tRecordar:
                 //ToDO por implementar
@@ -95,8 +105,9 @@ public class Login extends AppCompatActivity implements View.OnClickListener {
             String session = result.getSessionID();
             if (session != null){
                 mDialog.dismiss();
+                loginData.setSessionID(session);
                 Intent i = new Intent(Login.this, MainActivity.class);
-                i.putExtra("User",loginData.getUser());
+                saveUserData(loginData);
                 startActivity(i);
             }else
                 showAlert("", "Authentication failed");
@@ -108,11 +119,6 @@ public class Login extends AppCompatActivity implements View.OnClickListener {
             mDialog.setMessage("Authenticating...");
             mDialog.show();
         }
-    }
-
-    public boolean checkData(){
-        return user.getText().toString().trim().length()>0 && password.getText().toString().trim().length()>0;
-
     }
 
     public void showAlert (String title, String msg){
@@ -132,5 +138,45 @@ public class Login extends AppCompatActivity implements View.OnClickListener {
         }else
             result.setSessionID(null);
         return result;
+    }
+
+
+    public boolean checkDataLogin(){
+        Boolean validated = true;
+        password.setError(null);
+        user.setError(null);
+
+        String passTemp = password.getText().toString();
+        String userTemp = user.getText().toString();
+
+        if(TextUtils.isEmpty(passTemp)){
+            password.setError("Field required");
+            validated = false;
+        }else if(!validUser(passTemp)){
+            password.setError("At least 4 chars needed");
+            validated = false;
+        }
+        if(TextUtils.isEmpty(userTemp)){
+            user.setError("Field required");
+            validated = false;
+        }else if(!validUser(userTemp)){
+            user.setError("At least 4 chars needed");
+            validated = false;
+        }
+
+        return validated;
+
+    }
+    public boolean validUser(String user){
+        return user.trim().length()>3;
+    }
+    public boolean validPass(String pass){
+        return pass.trim().length()>3;
+    }
+
+    private void saveUserData(LoginApp data){
+        editor.putString("user",data.getUser());
+        editor.putString("session",data.getSessionID());
+        editor.commit();
     }
 }

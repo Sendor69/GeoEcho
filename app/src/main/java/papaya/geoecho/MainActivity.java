@@ -1,7 +1,9 @@
 package papaya.geoecho;
 
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -17,11 +19,10 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
-import papaya.geoecho.Model.LoginApp;
-
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
-    LoginApp loginData;
+    SharedPreferences sharedPref;
+    SharedPreferences.Editor editor;
     TextView user;
     View headerView;
 
@@ -33,7 +34,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        Intent i = getIntent();
+        sharedPref = getSharedPreferences("UserData", Context.MODE_PRIVATE);
+        editor = sharedPref.edit();
+
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -55,7 +58,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         navigationView.setNavigationItemSelectedListener(this);
         headerView = navigationView.getHeaderView(0);
         user = (TextView)headerView.findViewById(R.id.tUserNav);
-        user.setText(i.getStringExtra("User"));
+        user.setText(sharedPref.getString("user",""));
 
 
     }

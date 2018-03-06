@@ -68,4 +68,8 @@ public class Registre extends AppCompatActivity implements View.OnClickListener{
             mDialog.show();
         }
     }
+
+    boolean isEmailValid(CharSequence email) {
+        return android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches();
+    }
 }
