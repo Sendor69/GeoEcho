@@ -24,6 +24,13 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
+import java.io.ObjectOutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+
+import model.client.Logout;
+import model.client.Response;
+
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
     SharedPreferences sharedPref;
@@ -52,7 +59,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         });
 
-
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -64,7 +70,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         headerView = navigationView.getHeaderView(0);
         user = (TextView)headerView.findViewById(R.id.tUserNav);
         user.setText(sharedPref.getString("user",""));
-
 
     }
 
@@ -126,31 +131,28 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     /*
     Función para enviar petición al servidor de eliminar la sessionId asignada a este usuario
      */
-    public class UserLogoutTask extends AsyncTask<Void, Void, Boolean> {
+    public class UserLogoutTask extends AsyncTask<Void, Void, Response> {
 
-        /*Clase tonta, no hace nada */
-        UserLogoutTask() {
-
-        }
 
         ProgressDialog mDialog = new ProgressDialog(MainActivity.this);
 
         @Override
-        protected Boolean doInBackground(Void... params) {
-            // TODO: intenta conectarte al server y logear.
+        protected Response doInBackground(Void... params) {
+
+            Response result = new Response();
+            Logout logoutData = new Logout();
+            logoutData.setSessionID(sharedPref.getInt("session",0));
 
             try {
-                // Simulate network access.
-                Thread.sleep(2000);
-            } catch (InterruptedException e) {
-                return false;
-            }
+                result =serverLogout(logoutData);
+            } catch (Exception e) {
 
-            return null;
+            }
+            return result;
         }
 
         @Override
-        protected void onPostExecute(final Boolean success) {
+        protected void onPostExecute(final Response result) {
             mDialog.dismiss();
             Intent intent = new Intent (MainActivity.this,LogReg.class);
             // se eliminan todas las actividades y se inicia desde la pantalla de inicio/registro
@@ -204,6 +206,34 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         return super.onKeyDown(keyCode, event);
     }
 
+    public Response serverLogout ( Logout data) throws Exception{
+
+        String serverUrl = "http://geoechoserv.machadocode.com/geoechoserv";
+        Response result = new Response();
+        URL url = new URL(serverUrl);
+        HttpURLConnection con = (HttpURLConnection) url.openConnection();
+
+        //add request header
+        con.setRequestMethod("POST");
+        con.setDoOutput(true); // para poder excribir
+        con.setDoInput(true); // para poder leer
+
+        try {
+            ObjectOutputStream objectOut = new ObjectOutputStream(con.getOutputStream());
+            objectOut.writeObject(data);
+
+            int responseCode = con.getResponseCode();
+            if (responseCode == 200){
+                System.out.println("+++++++++++++++ Logout correcto ++++++++++++++");
+            }else
+                throw new Exception();
+
+        }catch (Exception e){
+            System.out.println("************** Ha fallado el logout ***************");
+        }
+
+        return result;
+    }
 
 
 

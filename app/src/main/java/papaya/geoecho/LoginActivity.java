@@ -96,8 +96,6 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             // TODO: intenta conectarte al server y logear.
             Response result = new Response();
             try {
-                // Simulate network access.
-                Thread.sleep(2000);
                 result= serverLogin(loginData);
             } catch (Exception e) {
                 showAlert("Connection Error","Imposible to connect with server. Please try again");
@@ -111,7 +109,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             int session = result.getSessionID();
             switch (session) {
                 case 0:
-                    showAlert("Authentication", "Incorrect log in");
+                    showAlert("Authentication", "User or password are incorrects");
                     break;
                 case -1:
                     showAlert("Error", "Server connection failed. Please try again");
