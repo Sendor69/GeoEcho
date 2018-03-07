@@ -89,10 +89,12 @@ public class Registre extends AppCompatActivity implements View.OnClickListener{
             if (session != null){
                 switch (session){
                     case "USER_DUPLICATED":
-                        showAlert("", "User not available");
+                        user.setError("User already exists");
+                        user.requestFocus();
                         break;
                     case "MAIL_DUPLICATED":
-                        showAlert("", "E-mail already used");
+                        mail.setError("Email already exists");
+                        user.requestFocus();
                         break;
                     default:
                         registerData.setSessionID(session);
