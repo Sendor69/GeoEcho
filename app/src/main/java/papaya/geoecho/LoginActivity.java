@@ -21,8 +21,9 @@ import java.io.ObjectOutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-import papaya.geoecho.model.client.LoginApp;
-import papaya.geoecho.model.client.Response;
+
+import model.client.LoginApp;
+import model.client.Response;
 
 import static papaya.geoecho.R.id.bLogin;
 import static papaya.geoecho.R.id.tRecordar;
@@ -108,13 +109,20 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         @Override
         protected void onPostExecute(final Response result) {
             int session = result.getSessionID();
-            if (session != 0){
-                loginData.setSessionID(session);
-                Intent i = new Intent(LoginActivity.this, MainActivity.class);
-                saveUserData(loginData);
-                startActivity(i);
-            }else
-                showAlert("", "Incorrect log in");
+            switch (session) {
+                case 0:
+                    showAlert("Authentication", "Incorrect log in");
+                    break;
+                case -1:
+                    showAlert("Error", "Server connection failed. Please try again");
+                    break;
+                default:
+                    loginData.setSessionID(session);
+                    Intent i = new Intent(LoginActivity.this, MainActivity.class);
+                    saveUserData(loginData);
+                    startActivity(i);
+                    break;
+            }
             mDialog.dismiss();
         }
         @Override
@@ -159,16 +167,20 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
         if(TextUtils.isEmpty(passTemp)){
             password.setError("Field required");
+            password.requestFocus();
             validated = false;
         }else if(!validUser(passTemp)){
             password.setError("At least 4 chars needed");
+            password.requestFocus();
             validated = false;
         }
         if(TextUtils.isEmpty(userTemp)){
             user.setError("Field required");
+            user.requestFocus();
             validated = false;
         }else if(!validUser(userTemp)){
             user.setError("At least 4 chars needed");
+            user.requestFocus();
             validated = false;
         }
 

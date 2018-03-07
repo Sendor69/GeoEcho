@@ -1,4 +1,4 @@
-package papaya.geoecho.model.client;
+package model.client;
 
 /**
  * Created by Dani on 07/03/2018.

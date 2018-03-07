@@ -17,8 +17,8 @@ import android.widget.EditText;
 
 import java.util.Random;
 
-import papaya.geoecho.model.client.RegisterApp;
-import papaya.geoecho.model.client.Response;
+import model.client.RegisterApp;
+import model.client.Response;
 
 import static papaya.geoecho.R.id.regRegister;
 

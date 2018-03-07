@@ -1,4 +1,4 @@
-package papaya.geoecho.model.client;
+package model.client;
 
 import java.io.Serializable;
 
