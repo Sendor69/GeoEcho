@@ -107,7 +107,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         @Override
         protected void onPostExecute(final Response result) {
             int session = result.getSessionID();
-            switch (session) {
+            switch (session) { //Según la información que nos llegue
                 case 0:
                     showAlert("Authentication", "User or password are incorrects");
                     break;
