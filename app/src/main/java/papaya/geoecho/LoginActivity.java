@@ -16,21 +16,19 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-import papaya.geoecho.Model.LoginApp;
-import papaya.geoecho.Model.Response;
+import papaya.geoecho.model.client.LoginApp;
+import papaya.geoecho.model.client.Response;
 
 import static papaya.geoecho.R.id.bLogin;
 import static papaya.geoecho.R.id.tRecordar;
 
 
-public class Login extends AppCompatActivity implements View.OnClickListener {
+public class LoginActivity extends AppCompatActivity implements View.OnClickListener {
 
     //Referencias UI
 
@@ -86,7 +84,7 @@ public class Login extends AppCompatActivity implements View.OnClickListener {
 
         /*Clase tonta, no hace nada */
 
-        ProgressDialog mDialog = new ProgressDialog(Login.this);
+        ProgressDialog mDialog = new ProgressDialog(LoginActivity.this);
 
         UserLoginTask() {
 
@@ -99,8 +97,8 @@ public class Login extends AppCompatActivity implements View.OnClickListener {
             try {
                 // Simulate network access.
                 Thread.sleep(2000);
-                result= validateLogin(loginData);
-            } catch (InterruptedException e) {
+                result= serverLogin(loginData);
+            } catch (Exception e) {
                 showAlert("Connection Error","Imposible to connect with server. Please try again");
             }
 
@@ -109,10 +107,10 @@ public class Login extends AppCompatActivity implements View.OnClickListener {
 
         @Override
         protected void onPostExecute(final Response result) {
-            String session = result.getSessionID();
-            if (session != null){
+            int session = result.getSessionID();
+            if (session != 0){
                 loginData.setSessionID(session);
-                Intent i = new Intent(Login.this, MainActivity.class);
+                Intent i = new Intent(LoginActivity.this, MainActivity.class);
                 saveUserData(loginData);
                 startActivity(i);
             }else
@@ -128,7 +126,7 @@ public class Login extends AppCompatActivity implements View.OnClickListener {
     }
 
     public void showAlert (String title, String msg){
-        AlertDialog alertDialog = new AlertDialog.Builder(Login.this,R.style.CustomAlert).create();
+        AlertDialog alertDialog = new AlertDialog.Builder(LoginActivity.this,R.style.CustomAlert).create();
         alertDialog.setTitle(title);
         alertDialog.setMessage(msg);
         alertDialog.show();
@@ -140,9 +138,9 @@ public class Login extends AppCompatActivity implements View.OnClickListener {
 
         Response result = new Response();
         if (data.getUser().equals("Admin") && data.getPass().equals("admin")) {
-            result.setSessionID(data.getUser());
+            result.setSessionID(1988);
         }else
-            result.setSessionID(null);
+            result.setSessionID(0);
         return result;
     }
 
@@ -188,13 +186,13 @@ public class Login extends AppCompatActivity implements View.OnClickListener {
      */
     private void saveUserData(LoginApp data){
         editor.putString("user",data.getUser());
-        editor.putString("session",data.getSessionID());
+        editor.putInt("session",data.getSessionID());
         editor.commit();
     }
 
     public Response serverLogin (LoginApp data) throws Exception{
 
-        String serverUrl = "";
+        String serverUrl = "http://geoechoserv.machadocode.com/geoechoserv";
         Response result = new Response();
         URL url = new URL(serverUrl);
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
@@ -207,33 +205,16 @@ public class Login extends AppCompatActivity implements View.OnClickListener {
         try {
             ObjectOutputStream objectOut = new ObjectOutputStream(con.getOutputStream());
             objectOut.writeObject(data);
+            int responseCode = con.getResponseCode();
+            if (responseCode == 200){
+                ObjectInputStream objectInput = new ObjectInputStream(con.getInputStream());
+                result = (Response)objectInput.readObject();
+            }else
+                throw new Exception();
 
         }catch (Exception e){
-
-        }
-        int responseCode = con.getResponseCode();
-
-        System.out.println("\nSending 'POST' request to URL : " + url);
-
-        //System.out.println("Post parameters : " + urlParameters);
-        System.out.println("Response Code : " + responseCode);
-
-        String inputLine;
-        StringBuilder response;
-
-        try{
-            //Como recibir la información ?
-            ObjectInputStream objectInput = new ObjectInputStream(con.getInputStream());
-
-            BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
-            response = new StringBuilder();
-            while ((inputLine = in.readLine()) != null) {
-                response.append(inputLine);
-            }
-            result.setSessionID(response.toString());
-
-        }catch (Exception e){
-
+            result = new Response();
+            result.setSessionID(-1);
         }
 
         return result;

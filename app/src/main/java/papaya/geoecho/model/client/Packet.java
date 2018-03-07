@@ -1,4 +1,4 @@
-package papaya.geoecho.Model;
+package papaya.geoecho.model.client;
 
 import java.io.Serializable;
 
@@ -7,13 +7,13 @@ import java.io.Serializable;
  */
 
 public abstract class Packet implements Serializable {
-    private String sessionID;
+    private int sessionID;
 
-    public String getSessionID() {
+    public int getSessionID() {
         return sessionID;
     }
 
-    public void setSessionID(String sessionID) {
+    public void setSessionID(int sessionID) {
         this.sessionID = sessionID;
     }
 }

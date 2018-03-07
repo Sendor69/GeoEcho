@@ -33,11 +33,11 @@ public class LogReg extends AppCompatActivity implements View.OnClickListener {
     public void onClick(View view) {
         switch (view.getId()) {
             case rLogin:
-                Intent i = new Intent(this, Login.class);
+                Intent i = new Intent(this, LoginActivity.class);
                 startActivity(i);
                 break;
             case rRegister:
-                Intent intent = new Intent(this, Registre.class);
+                Intent intent = new Intent(this, RegisterActivity.class);
                 startActivity(intent);
         }
     }

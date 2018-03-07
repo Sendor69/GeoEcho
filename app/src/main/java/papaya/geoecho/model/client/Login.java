@@ -1,10 +1,10 @@
-package papaya.geoecho.Model;
+package papaya.geoecho.model.client;
 
 /**
- * Created by Dani on 05/03/2018.
+ * Created by Dani on 07/03/2018.
  */
 
-public class LoginApp extends Packet{
+public abstract class Login extends Packet{
 
     private String user;
     private String pass;

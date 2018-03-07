@@ -17,12 +17,12 @@ import android.widget.EditText;
 
 import java.util.Random;
 
-import papaya.geoecho.Model.RegisterApp;
-import papaya.geoecho.Model.Response;
+import papaya.geoecho.model.client.RegisterApp;
+import papaya.geoecho.model.client.Response;
 
 import static papaya.geoecho.R.id.regRegister;
 
-public class Registre extends AppCompatActivity implements View.OnClickListener{
+public class RegisterActivity extends AppCompatActivity implements View.OnClickListener{
 
     private EditText user, password, mail;
     private Button register;
@@ -66,7 +66,7 @@ public class Registre extends AppCompatActivity implements View.OnClickListener{
 
         /*Clase tonta, no hace nada */
 
-        ProgressDialog mDialog = new ProgressDialog(Registre.this);
+        ProgressDialog mDialog = new ProgressDialog(RegisterActivity.this);
 
         @Override
         protected Response doInBackground(Void... params) {
@@ -85,20 +85,20 @@ public class Registre extends AppCompatActivity implements View.OnClickListener{
 
         @Override
         protected void onPostExecute(final Response result) {
-            String session = result.getSessionID();
-            if (session != null){
+            int session = result.getSessionID();
+            if (session != 0){
                 switch (session){
-                    case "USER_DUPLICATED":
+                    case 1:
                         user.setError("User already exists");
                         user.requestFocus();
                         break;
-                    case "MAIL_DUPLICATED":
+                    case 2:
                         mail.setError("Email already exists");
                         user.requestFocus();
                         break;
                     default:
                         registerData.setSessionID(session);
-                        Intent i = new Intent(Registre.this, MainActivity.class);
+                        Intent i = new Intent(RegisterActivity.this, MainActivity.class);
                         saveUserData(registerData);
                         startActivity(i);
                         break;
@@ -163,7 +163,7 @@ public class Registre extends AppCompatActivity implements View.OnClickListener{
     }
 
     public void showAlert (String title, String msg){
-        AlertDialog alertDialog = new AlertDialog.Builder(Registre.this,R.style.CustomAlert).create();
+        AlertDialog alertDialog = new AlertDialog.Builder(RegisterActivity.this,R.style.CustomAlert).create();
         alertDialog.setTitle(title);
         alertDialog.setMessage(msg);
         alertDialog.show();
@@ -173,7 +173,7 @@ public class Registre extends AppCompatActivity implements View.OnClickListener{
     private void saveUserData(RegisterApp data){
         editor.putString("user",data.getUser());
         editor.putString("mail",data.getMail());
-        editor.putString("session",data.getSessionID());
+        editor.putInt("session",data.getSessionID());
         editor.commit();
     }
 
@@ -184,13 +184,13 @@ public class Registre extends AppCompatActivity implements View.OnClickListener{
 
         switch (rdm.nextInt(3)){
             case 1:
-                result.setSessionID("USER_DUPLICATED");
+                result.setSessionID(1);
                 break;
             case 2:
-                result.setSessionID("MAIL_DUPLICATED");
+                result.setSessionID(2);
                 break;
             default:
-                result.setSessionID(data.getUser()+123);
+                result.setSessionID(1988);
                 break;
         }
         return result;

@@ -185,7 +185,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         AlertDialog.Builder ab = new AlertDialog.Builder(MainActivity.this,R.style.CustomAlert);
         ab.setMessage("You will finalize your session. Are you sure?").setPositiveButton("Yes", dialogClickListener)
-                .setNegativeButton("No", dialogClickListener).setTitle("Login out");
+                .setNegativeButton("No", dialogClickListener).setTitle("LoginActivity out");
         AlertDialog alertDialog = ab.create();
         alertDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         alertDialog.show();
