@@ -131,6 +131,10 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         }
     }
 
+    /*
+    Función para validar los campos user y password.
+    Los campos no pueden estar vacíos y han de contener más de 3 caracteres
+ */
     public void showAlert (String title, String msg){
         AlertDialog alertDialog = new AlertDialog.Builder(LoginActivity.this,R.style.CustomAlert).create();
         alertDialog.setTitle(title);
@@ -139,16 +143,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         alertDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
     }
 
-    public Response validateLogin(LoginApp data){
-        //Validate login with server
 
-        Response result = new Response();
-        if (data.getUser().equals("Admin") && data.getPass().equals("admin")) {
-            result.setSessionID(1988);
-        }else
-            result.setSessionID(0);
-        return result;
-    }
 
     /*
     Función para validar los campos user y password.
@@ -191,6 +186,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     public boolean validPass(String pass){
         return pass.trim().length()>3;
     }
+
     /*
     Función para guardar la información del usuario de una actividad a otra
      */
@@ -200,6 +196,9 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         editor.commit();
     }
 
+    /*
+    Función que conectará l'aplicación con el servidor y solicitará la validación del usuario
+  */
     public Response serverLogin (LoginApp data) throws Exception{
 
         String serverUrl = "http://geoechoserv.machadocode.com/geoechoserv";
@@ -229,4 +228,18 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
         return result;
     }
+
+    /*
+    Función para probar el login sin conexión.
+    public Response validateLogin(LoginApp data){
+        //Validate login with server
+
+        Response result = new Response();
+        if (data.getUser().equals("Admin") && data.getPass().equals("admin")) {
+            result.setSessionID(1988);
+        }else
+            result.setSessionID(0);
+        return result;
+    }
+    */
 }

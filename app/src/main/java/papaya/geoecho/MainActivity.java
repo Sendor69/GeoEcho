@@ -70,7 +70,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         headerView = navigationView.getHeaderView(0);
         user = (TextView)headerView.findViewById(R.id.tUserNav);
         user.setText(sharedPref.getString("user",""));
-
     }
 
     @Override
@@ -112,7 +111,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         int id = item.getItemId();
 
         if (id == R.id.nav_camera) {
-            // Handle the camera action
+
         } else if (id == R.id.nav_gallery) {
 
         } else if (id == R.id.nav_slideshow) {
@@ -157,6 +156,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             Intent intent = new Intent (MainActivity.this,LogReg.class);
             // se eliminan todas las actividades y se inicia desde la pantalla de inicio/registro
             intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            editor.clear();
             startActivity(intent);
         }
 

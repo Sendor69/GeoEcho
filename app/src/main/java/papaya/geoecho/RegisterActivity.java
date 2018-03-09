@@ -15,7 +15,10 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
-import java.util.Random;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 
 import model.client.RegisterApp;
 import model.client.Response;
@@ -64,8 +67,6 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
 
     public class UserCreateTask extends AsyncTask<Void, Void, Response> {
 
-        /*Clase tonta, no hace nada */
-
         ProgressDialog mDialog = new ProgressDialog(RegisterActivity.this);
 
         @Override
@@ -86,8 +87,10 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
         @Override
         protected void onPostExecute(final Response result) {
             int session = result.getSessionID();
-            if (session != 0){
                 switch (session){
+                    case -1:
+                        showAlert("Error", "Server connection failed. Please try again");
+                        break;
                     case 1:
                         user.setError("User already exists");
                         user.requestFocus();
@@ -103,7 +106,6 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
                         startActivity(i);
                         break;
                 }
-            }
             mDialog.dismiss();
         }
         @Override
@@ -129,37 +131,41 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
         String userTemp = user.getText().toString();
         String mailTemp = mail.getText().toString();
 
-        if(TextUtils.isEmpty(passTemp)){
-            password.setError("Field required");
-            validated = false;
-        }else if(!validUser(passTemp)) {
-            password.setError("At least 4 chars needed");
-            validated = false;
-
-        }if(TextUtils.isEmpty(userTemp)){
-            user.setError("Field required");
-            validated = false;
-        }else if(!validUser(userTemp)){
-            user.setError("At least 4 chars needed");
-            validated = false;
-        }
-
         if (TextUtils.isEmpty(mailTemp)){
             mail.setError("Field required");
+            mail.requestFocus();
             validated = false;
         }else if(!isEmailValid(mailTemp)){
             mail.setError("Enter a valid @mail");
+            mail.requestFocus();
+            validated = false;
+        }
+
+        if(TextUtils.isEmpty(passTemp)){
+            password.setError("Field required");
+            password.requestFocus();
+            validated = false;
+        }else if(!validMinChars(passTemp)) {
+            password.setError("At least 4 chars needed");
+            password.requestFocus();
+            validated = false;
+        }
+
+        if(TextUtils.isEmpty(userTemp)){
+            user.setError("Field required");
+            user.requestFocus();
+            validated = false;
+        }else if(!validMinChars(userTemp)){
+            user.setError("At least 4 chars needed");
+            user.requestFocus();
             validated = false;
         }
 
         return validated;
 
     }
-    public boolean validUser(String user){
+    public boolean validMinChars(String user){
         return user.trim().length()>3;
-    }
-    public boolean validPass(String pass){
-        return pass.trim().length()>3;
     }
 
     public void showAlert (String title, String msg){
@@ -179,27 +185,8 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
 
     public Response validateRegister(RegisterApp data) throws Exception{
 
+        String serverUrl = "http://geoechoserv.machadocode.com/geoechoserv";
         Response result = new Response();
-        Random rdm = new Random();
-
-        switch (rdm.nextInt(3)){
-            case 1:
-                result.setSessionID(1);
-                break;
-            case 2:
-                result.setSessionID(2);
-                break;
-            default:
-                result.setSessionID(1988);
-                break;
-        }
-        return result;
-
-        /* TODO por implementar con el servidor
-
-        String serverUrl = "";
-
-
         URL url = new URL(serverUrl);
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
 
@@ -212,36 +199,19 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
             ObjectOutputStream objectOut = new ObjectOutputStream(con.getOutputStream());
             objectOut.writeObject(data);
 
-        }catch (Exception e){
+            int responseCode = con.getResponseCode();
 
-        }
-        int responseCode = con.getResponseCode();
-
-        System.out.println("\nSending 'POST' request to URL : " + url);
-
-        //System.out.println("Post parameters : " + urlParameters);
-        System.out.println("Response Code : " + responseCode);
-
-        String inputLine;
-        StringBuilder response;
-
-        try{
-            //Como recibir la información ?
-            ObjectInputStream objectInput = new ObjectInputStream(con.getInputStream());
-
-            BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
-            response = new StringBuilder();
-            while ((inputLine = in.readLine()) != null) {
-                response.append(inputLine);
-            }
-            result.setSessionID(response.toString());
+            if (responseCode == 200){
+                ObjectInputStream objectInput = new ObjectInputStream(con.getInputStream());
+                result = (Response)objectInput.readObject();
+            }else
+                throw new Exception();
 
         }catch (Exception e){
-
+            result = new Response();
+            result.setSessionID(-1);
         }
 
         return result;
-
-        */
     }
 }
