@@ -79,7 +79,10 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
     }
 
-
+    /*
+    Función AsyncTask que en segundo plano connectarà con el servidor, validarà el usuario y lanzará
+        la actividad principal, pasandole los datos del usuario y el sessionID
+     */
 
     public class UserLoginTask extends AsyncTask<Void, Void, Response> {
 
@@ -93,7 +96,6 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
         @Override
         protected Response doInBackground(Void... params) {
-            // TODO: intenta conectarte al server y logear.
             Response result = new Response();
             try {
                 result= serverLogin(loginData);

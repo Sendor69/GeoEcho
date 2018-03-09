@@ -65,6 +65,10 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
 
     }
 
+    /*
+    Función que en segundo plano enviará los datos del usuario nuevo al servidor para que los valide
+    y si son correctos, los guardará en la base de datos y enviará una respuesta positiva.
+     */
     public class UserCreateTask extends AsyncTask<Void, Void, Response> {
 
         ProgressDialog mDialog = new ProgressDialog(RegisterActivity.this);
@@ -74,7 +78,6 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
             // TODO: intenta conectarte al server y logear.
             Response result = new Response();
             try {
-                // Simulate network access.
                 result = validateRegister(registerData);
                 Thread.sleep(2000);
             } catch (Exception e) {
@@ -120,6 +123,9 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
         return android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches();
     }
 
+    /*
+    Función para controlar los EditText, longitud, email correcto, etc
+     */
     public boolean checkDataRegister(){
         Boolean validated = true;
 
@@ -176,6 +182,9 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
         alertDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
     }
 
+    /*
+    Guarda los datos del usuario en un sharedPreferences para intercambiarla por las actividades
+     */
     private void saveUserData(RegisterApp data){
         editor.putString("user",data.getUser());
         editor.putString("mail",data.getMail());
@@ -183,6 +192,10 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
         editor.commit();
     }
 
+    /*
+    Función que se ejecutará dentro del AsyncTask para validar el registro con el servidor. Devuelve
+    un objeto tipo Response de donde extraeremos la respuesta en forma de sessionID
+     */
     public Response validateRegister(RegisterApp data) throws Exception{
 
         String serverUrl = "http://geoechoserv.machadocode.com/geoechoserv";
