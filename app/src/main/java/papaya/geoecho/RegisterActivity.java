@@ -75,11 +75,9 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
 
         @Override
         protected Response doInBackground(Void... params) {
-            // TODO: intenta conectarte al server y logear.
             Response result = new Response();
             try {
                 result = validateRegister(registerData);
-                Thread.sleep(2000);
             } catch (Exception e) {
                 showAlert("Connection Error","Imposible to connect with server. Please try again");
             }
@@ -91,6 +89,9 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
         protected void onPostExecute(final Response result) {
             int session = result.getSessionID();
                 switch (session){
+                    case 0:
+                        showAlert("Error", "Server cannot register the user. Please try again");
+                        break;
                     case -1:
                         showAlert("Error", "Server connection failed. Please try again");
                         break;
@@ -198,10 +199,13 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
      */
     public Response validateRegister(RegisterApp data) throws Exception{
 
-        String serverUrl = "http://geoechoserv.machadocode.com/geoechoserv";
+        String serverUrl = "http://ec2-52-31-205-76.eu-west-1.compute.amazonaws.com/geoechoserv";
         Response result = new Response();
         URL url = new URL(serverUrl);
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
+        String user = data.getUser();
+        String pass = data.getPass();
+        String mail = data.getMail();
 
         //add request header
         con.setRequestMethod("POST");

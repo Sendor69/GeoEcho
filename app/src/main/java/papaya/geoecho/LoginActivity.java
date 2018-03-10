@@ -21,7 +21,6 @@ import java.io.ObjectOutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-
 import model.client.LoginApp;
 import model.client.Response;
 
@@ -30,6 +29,9 @@ import static papaya.geoecho.R.id.tRecordar;
 
 
 public class LoginActivity extends AppCompatActivity implements View.OnClickListener {
+
+    //Permisos
+    private final int ALL_PERMISSION = 123;
 
     //Referencias UI
 
@@ -54,6 +56,8 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
         sharedPref = getSharedPreferences("UserData", Context.MODE_PRIVATE);
         editor = sharedPref.edit();
+
+
 
         /*//TODO Para Implementar en los siguientes TEA
         forgotPass = (TextView) findViewById(tRecordar);
@@ -202,8 +206,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     Función que conectará l'aplicación con el servidor y solicitará la validación del usuario
   */
     public Response serverLogin (LoginApp data) throws Exception{
-
-        String serverUrl = "http://geoechoserv.machadocode.com/geoechoserv";
+        String serverUrl = "http://ec2-52-31-205-76.eu-west-1.compute.amazonaws.com/geoechoserv";
         Response result = new Response();
         URL url = new URL(serverUrl);
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
@@ -229,6 +232,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         }
 
         return result;
+
     }
 
     /*

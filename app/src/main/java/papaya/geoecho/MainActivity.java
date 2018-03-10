@@ -24,6 +24,13 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
+
 import java.io.ObjectOutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -37,6 +44,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     SharedPreferences.Editor editor;
     TextView user;
     View headerView;
+
+    //Localizacion
+
+    private double longitud = 0.0;
+    private double latitud = 0.0;
 
 
     @Override
@@ -70,6 +82,35 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         headerView = navigationView.getHeaderView(0);
         user = (TextView)headerView.findViewById(R.id.tUserNav);
         user.setText(sharedPref.getString("user",""));
+
+
+
+
+
+
+
+        ((SupportMapFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.map)).getMapAsync(new OnMapReadyCallback() {
+
+            @Override
+            public void onMapReady(GoogleMap googleMap) {
+                LatLng sydney = new LatLng(41.15, 1.1167);
+                googleMap.addMarker(new MarkerOptions()
+                        .position(sydney)
+                        .title("Papaya TEAM!")
+                        .snippet("Creating the BEST APP"));
+                googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(sydney,16));
+            }
+
+        });
+
+
+
+
+
+
+
+
     }
 
     @Override
@@ -208,7 +249,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     public Response serverLogout ( Logout data) throws Exception{
 
-        String serverUrl = "http://geoechoserv.machadocode.com/geoechoserv";
+        String serverUrl = "http://ec2-52-31-205-76.eu-west-1.compute.amazonaws.com/geoechoserv";
         Response result = new Response();
         URL url = new URL(serverUrl);
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
@@ -234,6 +275,27 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         return result;
     }
+
+    // Callback cridat per getMapAsync; s'executa quan el mapa està disponible
+    /*
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        mMap = googleMap;
+
+        //GoToEverest!!
+
+        latitud = 86.922623;
+        longitud = 27.986065;
+
+        // Afegim les coordenades i movem la càmera
+        LatLng novaposicio = new LatLng(latitud, longitud);
+        mMap.addMarker(new MarkerOptions().position(novaposicio).title("Papaya TEAM!"));
+        mMap.animateCamera(CameraUpdateFactory.newLatLng(novaposicio));
+        // Establim el zoom al mapa
+        mMap.setMinZoomPreference(6.0f);
+        mMap.setMaxZoomPreference(14.0f);
+    }
+    */
 
 
 
