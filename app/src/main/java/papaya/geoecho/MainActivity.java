@@ -7,6 +7,10 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
+import android.location.LocationProvider;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -23,6 +27,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -38,7 +43,7 @@ import java.net.URL;
 import model.client.Logout;
 import model.client.Response;
 
-public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
+public class MainActivity extends AppCompatActivity implements LocationListener, NavigationView.OnNavigationItemSelectedListener {
 
     SharedPreferences sharedPref;
     SharedPreferences.Editor editor;
@@ -46,9 +51,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     View headerView;
 
     //Localizacion
-
+    private Location location;
+    private LocationManager gestorLoc;
     private double longitud = 0.0;
     private double latitud = 0.0;
+
+    //Constantes
+    public static final int CONNECTION_ERROR = -1;
 
 
     @Override
@@ -83,9 +92,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         user = (TextView)headerView.findViewById(R.id.tUserNav);
         user.setText(sharedPref.getString("user",""));
 
-
-
-
+        //Gestion GPS
+        gestorLoc = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 
 
 
@@ -103,14 +111,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
 
         });
-
-
-
-
-
-
-
-
     }
 
     @Override
@@ -193,12 +193,20 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         @Override
         protected void onPostExecute(final Response result) {
+            int status = result.getStatusQuery();
+
+            //Gestionamos la respuesta del servidor
+            if (status == result.LOGOUT_FAILED || status == CONNECTION_ERROR){
+                showAlert("Error", "Error finishing this session. Please try again");
+
+            }else if (status == result.LOGOUT_OK) {
+                Intent intent = new Intent(MainActivity.this, LogReg.class);
+                // se eliminan todas las actividades y se inicia desde la pantalla de inicio/registro
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                editor.clear();
+                startActivity(intent);
+            }
             mDialog.dismiss();
-            Intent intent = new Intent (MainActivity.this,LogReg.class);
-            // se eliminan todas las actividades y se inicia desde la pantalla de inicio/registro
-            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            editor.clear();
-            startActivity(intent);
         }
 
         @Override
@@ -265,16 +273,77 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
             int responseCode = con.getResponseCode();
             if (responseCode == 200){
-                System.out.println("+++++++++++++++ Logout correcto ++++++++++++++");
+                //recibiremos un statusQuery
             }else
                 throw new Exception();
 
         }catch (Exception e){
-            System.out.println("************** Ha fallado el logout ***************");
+            result.setStatusQuery(CONNECTION_ERROR);
         }
 
         return result;
     }
+
+
+
+    @Override
+    public void onLocationChanged(Location location) {
+        //Com que la localització triga uns segons després d'activar el GPS, ens avisarà quan la trobi
+        if (location !=null){
+            this.location = location;
+        }
+    }
+
+    @Override
+    public void onStatusChanged(String provider, int status, Bundle extras) {
+        String missatge = "";
+        switch (status) {
+            case LocationProvider.OUT_OF_SERVICE:
+                missatge = "GPS fora de servei";
+                break;
+            case LocationProvider.TEMPORARILY_UNAVAILABLE:
+                missatge = "GPS temporalment no disponible";
+                break;
+            case LocationProvider.AVAILABLE:
+                missatge = "GPS actiu";
+                break;
+        }
+
+        Toast.makeText(getApplicationContext(),
+                missatge,
+                Toast.LENGTH_LONG).show();
+    }
+
+    @Override
+    public void onProviderEnabled(String provider) {
+        //Si el GPS està actiu no activarem els botons encara. Esperarem a tenir la localització
+        Toast.makeText(this,"GPS actiu. Buscant localitzacio...",Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onProviderDisabled(String provider) {
+        //Si desactivem el GPS manualment
+        Toast.makeText(this,"GPS desactivat",Toast.LENGTH_SHORT).show();
+        location = null;
+    }
+
+    public void showAlert (String title, String msg){
+        AlertDialog alertDialog = new AlertDialog.Builder(MainActivity.this,R.style.CustomAlert).create();
+        alertDialog.setTitle(title);
+        alertDialog.setMessage(msg);
+        alertDialog.show();
+        alertDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+    }
+
+
+
+
+
+
+
+
+
+
 
     // Callback cridat per getMapAsync; s'executa quan el mapa està disponible
     /*

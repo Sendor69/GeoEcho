@@ -42,6 +42,9 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     private SharedPreferences sharedPref;
     private SharedPreferences.Editor editor;
 
+    //Constantes
+    public static final int CONNECTION_ERROR = -1;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -112,21 +115,23 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
         @Override
         protected void onPostExecute(final Response result) {
-            int session = result.getSessionID();
-            switch (session) { //Según la información que nos llegue
-                case 0:
-                    showAlert("Authentication", "User or password are incorrects");
-                    break;
-                case -1:
-                    showAlert("Error", "Server connection failed. Please try again");
-                    break;
-                default:
-                    loginData.setSessionID(session);
-                    Intent i = new Intent(LoginActivity.this, MainActivity.class);
-                    saveUserData(loginData);
-                    startActivity(i);
-                    break;
-            }
+            int status = result.getStatusQuery();
+
+            //Gestionamos la respuesta del servidor
+            if (status == result.LOGIN_FAILED){
+                showAlert("Authentication", "User or password are incorrects");
+
+            }else if (status == result.LOGIN_OK){
+                loginData.setSessionID(result.getSessionID());
+                Intent i = new Intent(LoginActivity.this, MainActivity.class);
+                saveUserData(loginData);
+                startActivity(i);
+
+            }else if (status == CONNECTION_ERROR){
+                showAlert("Error", "Server connection failed. Please try again");
+
+            }else
+                showAlert("Unkown Error", "Contact with administrator");
             mDialog.dismiss();
         }
         @Override
@@ -228,11 +233,10 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
         }catch (Exception e){
             result = new Response();
-            result.setSessionID(-1);
+            result.setSessionID(CONNECTION_ERROR);
         }
 
         return result;
-
     }
 
     /*

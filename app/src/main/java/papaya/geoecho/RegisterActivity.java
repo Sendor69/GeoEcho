@@ -32,6 +32,11 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
     private SharedPreferences sharedPref;
     private SharedPreferences.Editor editor;
     private RegisterApp registerData;
+
+    //Constantes
+    public static final int CONNECTION_ERROR = -1;
+    public static final int USER_DUPLICATED = 1;
+    public static final int MAIL_DUPLICATED = 2;
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -87,29 +92,25 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
 
         @Override
         protected void onPostExecute(final Response result) {
-            int session = result.getSessionID();
-                switch (session){
-                    case 0:
-                        showAlert("Error", "Server cannot register the user. Please try again");
-                        break;
-                    case -1:
-                        showAlert("Error", "Server connection failed. Please try again");
-                        break;
-                    case 1:
-                        user.setError("User already exists");
-                        user.requestFocus();
-                        break;
-                    case 2:
-                        mail.setError("Email already exists");
-                        user.requestFocus();
-                        break;
-                    default:
-                        registerData.setSessionID(session);
-                        Intent i = new Intent(RegisterActivity.this, MainActivity.class);
-                        saveUserData(registerData);
-                        startActivity(i);
-                        break;
-                }
+            int status = result.getStatusQuery();
+
+            if (status == CONNECTION_ERROR){
+                showAlert("Error", "Server connection failed. Please try again");
+            }else if (status == result.REGISTER_NAME_FAILED){
+                user.setError("User already exists");
+                user.requestFocus();
+            }else if (status == result.REGISTER_EMAIL_FAILED){
+                mail.setError("Email already exists");
+                mail.requestFocus();
+            }else if (status == result.REGISTER_FAILED){
+                showAlert("Register Failed", "Error creating account.");
+            }else if (status == result.REGISTER_OK){
+                registerData.setSessionID(result.getSessionID());
+                Intent i = new Intent(RegisterActivity.this, MainActivity.class);
+                saveUserData(registerData);
+                startActivity(i);
+            }else
+                showAlert("Unkown Error", "Contact with administrator");
             mDialog.dismiss();
         }
         @Override
@@ -226,7 +227,7 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
 
         }catch (Exception e){
             result = new Response();
-            result.setSessionID(-1);
+            result.setSessionID(CONNECTION_ERROR);
         }
 
         return result;
