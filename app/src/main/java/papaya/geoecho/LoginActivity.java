@@ -156,9 +156,9 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
 
 
-    /*
-    Función para validar los campos user y password.
-    Los campos no pueden estar vacíos y han de contener más de 3 caracteres
+    /**
+     * Función para validar los campos user y password.
+     * Los campos no pueden estar vacíos y han de contener más de 3 caracteres
      */
     public boolean checkDataLogin(){
         Boolean validated = true;
@@ -207,9 +207,11 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         editor.commit();
     }
 
-    /*
-    Función que conectará l'aplicación con el servidor y solicitará la validación del usuario
-  */
+    /**
+     * Función que conectará l'aplicación con el servidor y solicitará la validación del usuario
+     *
+     * @param: datos de usuario LoginApp
+     */
     public Response serverLogin (LoginApp data) throws Exception{
         String serverUrl = "http://ec2-52-31-205-76.eu-west-1.compute.amazonaws.com/geoechoserv";
         Response result = new Response();
@@ -238,18 +240,4 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
         return result;
     }
-
-    /*
-    Función para probar el login sin conexión.
-    public Response validateLogin(LoginApp data){
-        //Validate login with server
-
-        Response result = new Response();
-        if (data.getUser().equals("Admin") && data.getPass().equals("admin")) {
-            result.setSessionID(1988);
-        }else
-            result.setSessionID(0);
-        return result;
-    }
-    */
 }

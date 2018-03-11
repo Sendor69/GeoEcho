@@ -115,8 +115,8 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
         }
         @Override
         protected void onPreExecute() {
-            //Autenticando login...
-            mDialog.setMessage("Sign in...");
+            //Creando cuenta...
+            mDialog.setMessage("Creating account...");
             mDialog.show();
         }
     }

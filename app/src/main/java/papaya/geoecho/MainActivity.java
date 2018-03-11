@@ -36,6 +36,7 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -44,6 +45,7 @@ import model.client.Logout;
 import model.client.Response;
 
 public class MainActivity extends AppCompatActivity implements LocationListener, NavigationView.OnNavigationItemSelectedListener {
+    //TODO Clase en desarrollo, se está testeando la posibilidad de incluir la geolocalización aquí
 
     SharedPreferences sharedPref;
     SharedPreferences.Editor editor;
@@ -217,6 +219,9 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
         }
     }
 
+    /*
+    Función que mostrará un mensaje de si/no preguntando si se quiere cerrar la sesión
+     */
     public void logout(){
         DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
             @Override
@@ -274,6 +279,8 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
             int responseCode = con.getResponseCode();
             if (responseCode == 200){
                 //recibiremos un statusQuery
+                ObjectInputStream objectInput = new ObjectInputStream(con.getInputStream());
+                result = (Response)objectInput.readObject();
             }else
                 throw new Exception();
 
@@ -282,6 +289,14 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
         }
 
         return result;
+    }
+
+    public void showAlert (String title, String msg){
+        AlertDialog alertDialog = new AlertDialog.Builder(MainActivity.this,R.style.CustomAlert).create();
+        alertDialog.setTitle(title);
+        alertDialog.setMessage(msg);
+        alertDialog.show();
+        alertDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
     }
 
 
@@ -293,7 +308,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
             this.location = location;
         }
     }
-
+    //TODO - Gestion de localización, aun por implementar
     @Override
     public void onStatusChanged(String provider, int status, Bundle extras) {
         String missatge = "";
@@ -327,25 +342,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
         location = null;
     }
 
-    public void showAlert (String title, String msg){
-        AlertDialog alertDialog = new AlertDialog.Builder(MainActivity.this,R.style.CustomAlert).create();
-        alertDialog.setTitle(title);
-        alertDialog.setMessage(msg);
-        alertDialog.show();
-        alertDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-    }
-
-
-
-
-
-
-
-
-
-
-
-    // Callback cridat per getMapAsync; s'executa quan el mapa està disponible
+    // Callback que se ejecuta cuando el mapa esta disponible
     /*
     @Override
     public void onMapReady(GoogleMap googleMap) {
