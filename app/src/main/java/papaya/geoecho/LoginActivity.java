@@ -142,10 +142,11 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         }
     }
 
-    /*
-    Función para validar los campos user y password.
-    Los campos no pueden estar vacíos y han de contener más de 3 caracteres
- */
+    /**
+     * Función que mostrará un AlertDialog personalizado
+     * @param: Titulo del error
+     * @param: Mensaje del error
+     */
     public void showAlert (String title, String msg){
         AlertDialog alertDialog = new AlertDialog.Builder(LoginActivity.this,R.style.CustomAlert).create();
         alertDialog.setTitle(title);
@@ -173,7 +174,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             password.setError("Field required");
             password.requestFocus();
             validated = false;
-        }else if(!validUser(passTemp)){
+        }else if(!ValidMinChars(passTemp)){
             password.setError("At least 4 chars needed");
             password.requestFocus();
             validated = false;
@@ -182,7 +183,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             user.setError("Field required");
             user.requestFocus();
             validated = false;
-        }else if(!validUser(userTemp)){
+        }else if(!ValidMinChars(userTemp)){
             user.setError("At least 4 chars needed");
             user.requestFocus();
             validated = false;
@@ -191,12 +192,10 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         return validated;
 
     }
-    public boolean validUser(String user){
-        return user.trim().length()>3;
+    public boolean ValidMinChars(String field){
+        return field.trim().length()>3;
     }
-    public boolean validPass(String pass){
-        return pass.trim().length()>3;
-    }
+
 
     /*
     Función para guardar la información del usuario de una actividad a otra
@@ -208,9 +207,10 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     }
 
     /**
-     * Función que conectará l'aplicación con el servidor y solicitará la validación del usuario
-     *
-     * @param: datos de usuario LoginApp
+     * Función en segundo plano que connectarà con el servidor, validarà el usuario y lanzará
+     * la actividad principal, pasandole los datos del usuario y el sessionID
+     * @param: objeto LoginApp
+     * @return: devolverá un objeto Response
      */
     public Response serverLogin (LoginApp data) throws Exception{
         String serverUrl = "http://ec2-52-31-205-76.eu-west-1.compute.amazonaws.com/geoechoserv";

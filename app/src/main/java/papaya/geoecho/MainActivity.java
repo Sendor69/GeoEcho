@@ -77,7 +77,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+                Snackbar.make(view, "Creará un nuevo geoEcho!", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
             }
         });
@@ -98,7 +98,10 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
         gestorLoc = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 
 
-
+        /**
+         * En desarrollo: Fragmento que contiene el mapa, aparecerá de fondo en la MainActivity
+         * La idea es que use la posición para mostrar los mensajes cercanos y los muestre
+         */
         ((SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map)).getMapAsync(new OnMapReadyCallback() {
 
@@ -247,6 +250,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
         alertDialog.show();
     }
 
+    //Hacemos que el botón de ir hacia atras, llame a la función logout
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
 
@@ -260,6 +264,11 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
         return super.onKeyDown(keyCode, event);
     }
 
+    /**
+     * Función en segundo plano enviará petición al servidor para que elimine la sessionID
+     * @param: objeto Logout
+     * @return: objeto Response para verificar que el logout es correcto
+     */
     public Response serverLogout ( Logout data) throws Exception{
 
         String serverUrl = "http://ec2-52-31-205-76.eu-west-1.compute.amazonaws.com/geoechoserv";
