@@ -29,11 +29,7 @@ import static papaya.geoecho.R.id.tRecordar;
 
 
 public class LoginActivity extends AppCompatActivity implements View.OnClickListener {
-
-    //Permisos
-    private final int ALL_PERMISSION = 123;
-
-    //Referencias UI
+        //Referencias UI
 
     private Button login;
     private EditText user,password;
@@ -123,7 +119,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
             }else if (status == result.LOGIN_OK){
                 loginData.setSessionID(result.getSessionID());
-                Intent i = new Intent(LoginActivity.this, MainActivity.class);
+                Intent i = new Intent(LoginActivity.this, MainGeoActivity.class);
                 saveUserData(loginData);
                 startActivity(i);
 
