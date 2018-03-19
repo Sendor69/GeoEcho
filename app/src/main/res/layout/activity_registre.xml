@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/background_gradient"
-    tools:context="papaya.geoecho.Registre">
+    tools:context="papaya.geoecho.RegisterActivity">
 
     <LinearLayout
         android:layout_width="354dp"

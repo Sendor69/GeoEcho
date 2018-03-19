@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/background_gradient"
-    tools:context="papaya.geoecho.Login">
+    tools:context="papaya.geoecho.LoginActivity">
 
     <LinearLayout
         android:layout_width="354dp"
@@ -88,13 +88,13 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="end"
                 android:clickable="true"
-                android:paddingTop="12dp"
+                android:paddingTop="14dp"
                 android:text="I've forgot my password"
                 android:textAlignment="textEnd"
                 android:textStyle="bold" />
 
         </LinearLayout>
-
     </LinearLayout>
+
 
 </android.support.constraint.ConstraintLayout>
