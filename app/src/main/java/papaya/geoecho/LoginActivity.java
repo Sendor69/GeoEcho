@@ -69,6 +69,12 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     public void onClick (View view) {
         switch (view.getId()){
             case bLogin:
+
+                editor.putString("user","Testing");
+                Intent ix = new Intent(LoginActivity.this, MainGeoActivity.class);
+                startActivity(ix);
+
+
                 if (checkDataLogin()){
                     loginData.setUser(user.getText().toString().trim());
                     loginData.setPass(password.getText().toString().trim());

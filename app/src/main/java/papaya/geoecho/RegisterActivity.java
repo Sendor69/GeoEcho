@@ -35,9 +35,6 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
 
     //Constantes
     public static final int CONNECTION_ERROR = -1;
-    public static final int USER_DUPLICATED = 1;
-    public static final int MAIL_DUPLICATED = 2;
-    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

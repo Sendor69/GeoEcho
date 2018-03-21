@@ -1,10 +1,12 @@
 package papaya.geoecho;
 
+import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.location.Location;
@@ -15,9 +17,11 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -39,16 +43,19 @@ import java.net.URL;
 import model.client.Logout;
 import model.client.Response;
 
-public class MainGeoActivity extends AppCompatActivity implements LocationListener {
+public class MainGeoActivity extends AppCompatActivity implements LocationListener, OnMapReadyCallback {
 
     SharedPreferences sharedPref;
     SharedPreferences.Editor editor;
 
     //Localizacion
+    private GoogleMap mMap;
     private Location location;
     private LocationManager gestorLoc;
     private double longitud = 0.0;
     private double latitud = 0.0;
+    SupportMapFragment mapFragment;
+    MarkerOptions startMark;
 
     //Constantes
     public static final int CONNECTION_ERROR = -1;
@@ -61,12 +68,6 @@ public class MainGeoActivity extends AppCompatActivity implements LocationListen
         setSupportActionBar(toolbar);
         this.setTitle("GeoEcho");
 
-        //Gestion GPS
-        gestorLoc = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-
-        sharedPref = getSharedPreferences("UserData", Context.MODE_PRIVATE);
-        editor = sharedPref.edit();
-
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -76,6 +77,24 @@ public class MainGeoActivity extends AppCompatActivity implements LocationListen
             }
         });
 
+        //Gestion GPS
+        gestorLoc = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        sharedPref = getSharedPreferences("UserData", Context.MODE_PRIVATE);
+        editor = sharedPref.edit();
+
+
+        // Obtenim el fragment del mapa i omplim el nostre "MapView"
+        mapFragment = (SupportMapFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.map);
+        mapFragment.getMapAsync(this);
+
+        //Por si no encontramos una posicion, mostraremos esto
+        startMark = (new MarkerOptions()
+                .position(new LatLng(0,0))
+                .title("Papaya TEAM!")
+                .snippet("Searching your position!"));
+
+        /*
         ((SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map)).getMapAsync(new OnMapReadyCallback() {
 
@@ -90,6 +109,38 @@ public class MainGeoActivity extends AppCompatActivity implements LocationListen
             }
 
         });
+
+        */
+
+        getLocation(gestorLoc);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.geo_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        //noinspection SimplifiableIfStatement
+        switch (id){
+            case R.id.action_logout:
+                new UserLogoutTask().execute();
+                break;
+            case R.id.action_map:
+                break;
+            case R.id.action_profile:
+                break;
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 
     /*
@@ -227,42 +278,72 @@ Función para enviar petición al servidor de eliminar la sessionId asignada a e
         alertDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.geo_menu, menu);
-        return true;
+
+
+    //TODO ===================================    MAPS ==========================================//
+
+    public void getLocation(LocationManager gestor) {
+        //Comprobará si tenim connexió GPS (precisa)
+        boolean isGPSEnabled = gestor
+                .isProviderEnabled(LocationManager.GPS_PROVIDER);
+        try {
+            if (isGPSEnabled) { //Si tenim connexió GPS, actualitcem la localització
+                if (location == null) {
+                    gestor.requestLocationUpdates(
+                            LocationManager.GPS_PROVIDER,
+                            1000,
+                            1, this);
+                    Log.d("GPS", "GPS Enabled");
+                    if (gestor != null) {
+                        location = gestor
+                                .getLastKnownLocation(LocationManager.GPS_PROVIDER);
+                    }
+                }
+            }else
+                Toast.makeText(this,"Please connect GPS to get location",Toast.LENGTH_SHORT).show();
+
+        }catch (SecurityException ex){}
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
+    public void onMapReady(GoogleMap googleMap) {
 
-        //noinspection SimplifiableIfStatement
-        switch (id){
-            case R.id.action_logout:
-                new UserLogoutTask().execute();
-                break;
-            case R.id.action_map:
-                break;
-            case R.id.action_profile:
-                break;
+        mMap = googleMap;
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED) {
+            mMap.setMyLocationEnabled(true);
         }
 
-        return super.onOptionsItemSelected(item);
+        if (location == null) {
+            mMap.addMarker(startMark);
+        }else{
+            latitud = location.getLatitude();
+            longitud = location.getLongitude();
+        }
+        LatLng sydney = new LatLng(latitud, longitud);
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(sydney,16));
+
+/*
+        LatLng sydney = new LatLng(location.getLatitude(), location.getLongitude());
+        googleMap.addMarker(new MarkerOptions()
+                .position(sydney)
+                .title("Papaya TEAM!")
+                .snippet("Creating the BEST APP"));
+        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(sydney,16));
+
+        */
     }
 
     @Override
     public void onLocationChanged(Location location) {
         //Com que la localització triga uns segons després d'activar el GPS, ens avisarà quan la trobi
+        Toast.makeText(this,"Nos movemos!...",Toast.LENGTH_SHORT).show();
         if (location !=null){
             this.location = location;
+            mapFragment.getMapAsync(this);
         }
     }
-    //TODO - Gestion de localización, aun por implementar
+
     @Override
     public void onStatusChanged(String provider, int status, Bundle extras) {
         String missatge = "";
@@ -285,7 +366,7 @@ Función para enviar petición al servidor de eliminar la sessionId asignada a e
 
     @Override
     public void onProviderEnabled(String provider) {
-        //Si el GPS està actiu no activarem els botons encara. Esperarem a tenir la localització
+        //Si el GPS està actiu...
         Toast.makeText(this,"GPS actiu. Buscant localitzacio...",Toast.LENGTH_SHORT).show();
     }
 
