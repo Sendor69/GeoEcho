@@ -84,7 +84,6 @@ public class MainGeoActivity extends AppCompatActivity implements LocationListen
         editor = sharedPref.edit();
 
 
-
         // Obtenim el fragment del mapa i omplim el nostre "MapView"
         mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
@@ -96,25 +95,10 @@ public class MainGeoActivity extends AppCompatActivity implements LocationListen
                 .title("Papaya TEAM!")
                 .snippet("Searching your position!"));
 
-        /*
-        ((SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.map)).getMapAsync(new OnMapReadyCallback() {
-
-            @Override
-            public void onMapReady(GoogleMap googleMap) {
-                LatLng sydney = new LatLng(41.15, 1.1167);
-                googleMap.addMarker(new MarkerOptions()
-                        .position(sydney)
-                        .title("Papaya TEAM!")
-                        .snippet("Creating the BEST APP"));
-                googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(sydney,16));
-            }
-
-        });
-
-        */
-
+        //Iniciamos la búsqueda de localizacion
         getLocation(gestorLoc);
+
+
     }
 
     @Override
@@ -131,6 +115,11 @@ public class MainGeoActivity extends AppCompatActivity implements LocationListen
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
+        if (item.isChecked()){
+            item.setChecked(false);
+        }else
+            item.setChecked(true);
+
         //noinspection SimplifiableIfStatement
         switch (id){
             case R.id.action_logout:
@@ -139,6 +128,10 @@ public class MainGeoActivity extends AppCompatActivity implements LocationListen
             case R.id.action_map:
                 break;
             case R.id.action_profile:
+                break;
+            case R.id.item_all:
+                break;
+            case R.id.item_publics:
                 break;
         }
 

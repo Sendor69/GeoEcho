@@ -16,8 +16,21 @@
             <item
                 android:id="@+id/action_map"
                 android:icon="@drawable/ic_place_black_24dp"
-                android:title="Map Settings"
-                app:showAsAction="ifRoom" />
+                android:title="Show GeoEcho's"
+                app:showAsAction="ifRoom">
+        <menu>
+            <group android:id="@+id/group"
+                android:checkableBehavior="single">
+            <item android:id="@+id/item_all"
+                android:checked="true"
+                android:title="All"/>
+            <item android:id="@+id/item_publics"
+                android:title="Publics"/>
+            <item android:id="@+id/item_privates"
+                android:title="Privates"/>
+            </group>
+        </menu>
+            </item>
             <item
                 android:id="@+id/action_logout"
                 android:icon="@drawable/ic_logoff"
