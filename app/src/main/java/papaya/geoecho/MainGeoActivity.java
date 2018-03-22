@@ -56,6 +56,7 @@ public class MainGeoActivity extends AppCompatActivity implements LocationListen
     private double latitud = 0.0;
     SupportMapFragment mapFragment;
     MarkerOptions startMark;
+    LatLng myPosition;
 
     //Constantes
     public static final int CONNECTION_ERROR = -1;
@@ -81,6 +82,7 @@ public class MainGeoActivity extends AppCompatActivity implements LocationListen
         gestorLoc = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         sharedPref = getSharedPreferences("UserData", Context.MODE_PRIVATE);
         editor = sharedPref.edit();
+
 
 
         // Obtenim el fragment del mapa i omplim el nostre "MapView"
@@ -320,8 +322,8 @@ Función para enviar petición al servidor de eliminar la sessionId asignada a e
             latitud = location.getLatitude();
             longitud = location.getLongitude();
         }
-        LatLng sydney = new LatLng(latitud, longitud);
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(sydney,16));
+        myPosition = new LatLng(latitud, longitud);
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(myPosition,16));
 
 /*
         LatLng sydney = new LatLng(location.getLatitude(), location.getLongitude());
@@ -336,11 +338,11 @@ Función para enviar petición al servidor de eliminar la sessionId asignada a e
 
     @Override
     public void onLocationChanged(Location location) {
-        //Com que la localització triga uns segons després d'activar el GPS, ens avisarà quan la trobi
-        Toast.makeText(this,"Nos movemos!...",Toast.LENGTH_SHORT).show();
+        //Cada vez que cambie la localización, actualizará la posicion actual y la enviará al servidor
         if (location !=null){
             this.location = location;
-            mapFragment.getMapAsync(this);
+            updateMyPosition(location);
+            //Todo función para enviar la posición al servidor y devuelva una lista de geoEchos cercanos
         }
     }
 
@@ -375,6 +377,11 @@ Función para enviar petición al servidor de eliminar la sessionId asignada a e
         //Si desactivem el GPS manualment
         Toast.makeText(this,"GPS desactivat",Toast.LENGTH_SHORT).show();
         location = null;
+    }
+
+    private void updateMyPosition(Location location){
+        myPosition = new LatLng(location.getLatitude(), location.getLongitude());
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(myPosition));
     }
 
 }
