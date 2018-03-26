@@ -16,7 +16,6 @@ import android.location.LocationProvider;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -73,8 +72,8 @@ public class MainGeoActivity extends AppCompatActivity implements LocationListen
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+                Intent i = new Intent (getApplicationContext(), newMessage.class);
+                startActivity(i);
             }
         });
 
@@ -304,6 +303,7 @@ Función para enviar petición al servidor de eliminar la sessionId asignada a e
     public void onMapReady(GoogleMap googleMap) {
 
         mMap = googleMap;
+        //Codigo para activar la localización del dispositivo con el punto azul
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED) {
             mMap.setMyLocationEnabled(true);
@@ -334,7 +334,7 @@ Función para enviar petición al servidor de eliminar la sessionId asignada a e
         //Cada vez que cambie la localización, actualizará la posicion actual y la enviará al servidor
         if (location !=null){
             this.location = location;
-            updateMyPosition(location);
+            //updateMyPosition(location);
             //Todo función para enviar la posición al servidor y devuelva una lista de geoEchos cercanos
         }
     }
@@ -344,13 +344,13 @@ Función para enviar petición al servidor de eliminar la sessionId asignada a e
         String missatge = "";
         switch (status) {
             case LocationProvider.OUT_OF_SERVICE:
-                missatge = "GPS fora de servei";
+                missatge = "GPS out of service";
                 break;
             case LocationProvider.TEMPORARILY_UNAVAILABLE:
-                missatge = "GPS temporalment no disponible";
+                missatge = "GPS temporally not available";
                 break;
             case LocationProvider.AVAILABLE:
-                missatge = "GPS actiu";
+                missatge = "GPS active";
                 break;
         }
 
@@ -361,14 +361,14 @@ Función para enviar petición al servidor de eliminar la sessionId asignada a e
 
     @Override
     public void onProviderEnabled(String provider) {
-        //Si el GPS està actiu...
-        Toast.makeText(this,"GPS actiu. Buscant localitzacio...",Toast.LENGTH_SHORT).show();
+        //Si el GPS està actiu.. .
+        Toast.makeText(this,"GPS active. Looking for location...",Toast.LENGTH_SHORT).show();
     }
 
     @Override
     public void onProviderDisabled(String provider) {
         //Si desactivem el GPS manualment
-        Toast.makeText(this,"GPS desactivat",Toast.LENGTH_SHORT).show();
+        Toast.makeText(this,"GPS desactivated",Toast.LENGTH_SHORT).show();
         location = null;
     }
 
