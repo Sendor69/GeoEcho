@@ -43,15 +43,21 @@
         </LinearLayout>
 
         <TextView
-            android:id="@+id/done"
+            android:id="@+id/image_added"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="right"
-            android:gravity="right"
             android:drawableLeft="@drawable/ic_done_black_24dp"
             android:drawableTint="#5bdf71"
+            android:gravity="right"
             android:text="Image added !"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            android:visibility="gone" />
+        <ImageView
+            android:id="@+id/photo_added"
+            android:layout_gravity="left"
+            android:layout_width="25dp"
+            android:layout_height="25dp" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -59,24 +65,6 @@
             android:layout_weight="1"
             android:padding="8dp"
             android:orientation="horizontal">
-
-            <Button
-                android:id="@+id/send_message"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp"
-                android:layout_marginTop="8dp"
-                android:layout_weight="1"
-                android:layout_marginRight="8dp"
-                android:paddingLeft="15dp"
-                android:paddingRight="25dp"
-                android:drawableLeft="@mipmap/ic_place"
-                android:drawableTint="@color/colorPrimaryDark"
-                android:background="@drawable/background_botton"
-                android:clickable="true"
-                android:text="Place it!"
-                android:textColor="#0071fc"
-                android:textSize="18sp" />
 
             <Button
                 android:id="@+id/add_photo"
@@ -94,7 +82,25 @@
                 android:clickable="true"
                 android:text="Photo"
                 android:textColor="#0071fc"
-                android:textSize="18sp" />
+                android:textSize="14sp" />
+
+            <Button
+                android:id="@+id/send_message"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginLeft="8dp"
+                android:layout_weight="1"
+                android:paddingLeft="15dp"
+                android:paddingRight="25dp"
+                android:drawableLeft="@mipmap/ic_place"
+                android:drawableTint="@color/colorPrimaryDark"
+                android:background="@drawable/background_botton"
+                android:clickable="true"
+                android:text="Place it!"
+                android:textColor="#0071fc"
+                android:textSize="14sp" />
 
         </LinearLayout>
 

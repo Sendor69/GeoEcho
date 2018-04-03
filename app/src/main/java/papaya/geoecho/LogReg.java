@@ -31,7 +31,7 @@ public class LogReg extends AppCompatActivity implements View.OnClickListener {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_log_reg);
 
-        Login = (Button) findViewById(rLogin);
+        Login = (Button) findViewById(R.id.rLogin);
         Login.setOnClickListener(this);
         Sign = (Button) findViewById(R.id.rRegister);
         Sign.setOnClickListener(this);

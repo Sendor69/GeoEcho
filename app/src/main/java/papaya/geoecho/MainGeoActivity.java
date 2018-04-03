@@ -31,6 +31,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
@@ -60,6 +61,8 @@ public class MainGeoActivity extends AppCompatActivity implements LocationListen
     //Constantes
     public static final int CONNECTION_ERROR = -1;
 
+    FloatingActionButton fab;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -68,12 +71,17 @@ public class MainGeoActivity extends AppCompatActivity implements LocationListen
         setSupportActionBar(toolbar);
         this.setTitle("GeoEcho");
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent i = new Intent (getApplicationContext(), newMessage.class);
-                startActivity(i);
+                if (location != null) {
+                    editor.putFloat("Lat",(float)location.getLatitude());
+                    editor.putFloat("Long",(float)location.getLongitude());
+                    editor.commit();
+                    Intent i = new Intent(getApplicationContext(), newMessage.class);
+                    startActivityForResult(i,0);
+                }
             }
         });
 
@@ -272,6 +280,15 @@ Función para enviar petición al servidor de eliminar la sessionId asignada a e
         alertDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == 0 && resultCode == RESULT_OK) {
+            mMap.addMarker(new MarkerOptions()
+                    .position(new LatLng(sharedPref.getFloat("Lat",0),sharedPref.getFloat("Long",0)))
+                    .title("My GeoEcho").icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
+        }
+    }
+
 
 
     //TODO ===================================    MAPS ==========================================//
@@ -282,6 +299,7 @@ Función para enviar petición al servidor de eliminar la sessionId asignada a e
                 .isProviderEnabled(LocationManager.GPS_PROVIDER);
         try {
             if (isGPSEnabled) { //Si tenim connexió GPS, actualitcem la localització
+
                 if (location == null) {
                     gestor.requestLocationUpdates(
                             LocationManager.GPS_PROVIDER,
@@ -294,6 +312,7 @@ Función para enviar petición al servidor de eliminar la sessionId asignada a e
                     }
                 }
             }else
+                disableButton();
                 Toast.makeText(this,"Please connect GPS to get location",Toast.LENGTH_SHORT).show();
 
         }catch (SecurityException ex){}
@@ -317,16 +336,6 @@ Función para enviar petición al servidor de eliminar la sessionId asignada a e
         }
         myPosition = new LatLng(latitud, longitud);
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(myPosition,16));
-
-/*
-        LatLng sydney = new LatLng(location.getLatitude(), location.getLongitude());
-        googleMap.addMarker(new MarkerOptions()
-                .position(sydney)
-                .title("Papaya TEAM!")
-                .snippet("Creating the BEST APP"));
-        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(sydney,16));
-
-        */
     }
 
     @Override
@@ -335,7 +344,6 @@ Función para enviar petición al servidor de eliminar la sessionId asignada a e
         if (location !=null){
             this.location = location;
             //updateMyPosition(location);
-            //Todo función para enviar la posición al servidor y devuelva una lista de geoEchos cercanos
         }
     }
 
@@ -344,12 +352,15 @@ Función para enviar petición al servidor de eliminar la sessionId asignada a e
         String missatge = "";
         switch (status) {
             case LocationProvider.OUT_OF_SERVICE:
+                disableButton();
                 missatge = "GPS out of service";
                 break;
             case LocationProvider.TEMPORARILY_UNAVAILABLE:
+                disableButton();
                 missatge = "GPS temporally not available";
                 break;
             case LocationProvider.AVAILABLE:
+                enableButton();
                 missatge = "GPS active";
                 break;
         }
@@ -363,18 +374,24 @@ Función para enviar petición al servidor de eliminar la sessionId asignada a e
     public void onProviderEnabled(String provider) {
         //Si el GPS està actiu.. .
         Toast.makeText(this,"GPS active. Looking for location...",Toast.LENGTH_SHORT).show();
+        enableButton();
     }
 
     @Override
     public void onProviderDisabled(String provider) {
         //Si desactivem el GPS manualment
         Toast.makeText(this,"GPS desactivated",Toast.LENGTH_SHORT).show();
+        disableButton();
         location = null;
     }
 
-    private void updateMyPosition(Location location){
-        myPosition = new LatLng(location.getLatitude(), location.getLongitude());
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(myPosition));
+    public void disableButton(){
+        fab.setEnabled(false);
+        fab.setAlpha(0.3f);
+    }
+    public void enableButton(){
+        fab.setEnabled(true);
+        fab.setAlpha(1f);
     }
 
 }
