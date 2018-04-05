@@ -41,9 +41,13 @@ import java.io.ObjectOutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.List;
 
 import model.client.Logout;
+import model.client.Message;
+import model.client.QueryApp;
 import model.client.Response;
+import model.client.ResponseQueryApp;
 
 public class MainGeoActivity extends AppCompatActivity implements LocationListener, OnMapReadyCallback, GoogleMap.OnMarkerClickListener {
 
@@ -156,54 +160,7 @@ public class MainGeoActivity extends AppCompatActivity implements LocationListen
     }
 
 
-    /*
-Función para enviar petición al servidor de eliminar la sessionId asignada a este usuario
- */
-    public class UserLogoutTask extends AsyncTask<Void, Void, Response> {
 
-
-        ProgressDialog mDialog = new ProgressDialog(MainGeoActivity.this);
-
-        @Override
-        protected Response doInBackground(Void... params) {
-
-            Response result = new Response();
-            Logout logoutData = new Logout();
-            logoutData.setSessionID(sharedPref.getInt("session",0));
-
-            try {
-                result =serverLogout(logoutData);
-            } catch (Exception e) {
-
-            }
-            return result;
-        }
-
-        @Override
-        protected void onPostExecute(final Response result) {
-            int status = result.getStatusQuery();
-
-            //Gestionamos la respuesta del servidor
-            if (status == result.LOGOUT_FAILED || status == CONNECTION_ERROR){
-                showAlert("Error", "Error finishing this session. Please try again");
-
-            }else if (status == result.LOGOUT_OK) {
-                Intent intent = new Intent(MainGeoActivity.this, LogReg.class);
-                // se eliminan todas las actividades y se inicia desde la pantalla de inicio/registro
-                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                editor.clear();
-                startActivity(intent);
-            }
-            mDialog.dismiss();
-        }
-
-        @Override
-        protected void onPreExecute() {
-            //Autenticando login...
-            mDialog.setMessage("Disconnecting...");
-            mDialog.show();
-        }
-    }
 
     /*
     Función que mostrará un mensaje de si/no preguntando si se quiere cerrar la sesión
@@ -247,41 +204,6 @@ Función para enviar petición al servidor de eliminar la sessionId asignada a e
         return super.onKeyDown(keyCode, event);
     }
 
-    /**
-     * Función en segundo plano enviará petición al servidor para que elimine la sessionID
-     * @param: objeto Logout
-     * @return: objeto Response para verificar que el logout es correcto
-     */
-    public Response serverLogout ( Logout data) throws Exception{
-
-        String serverUrl = "http://ec2-52-31-205-76.eu-west-1.compute.amazonaws.com/geoechoserv";
-        Response result = new Response();
-        URL url = new URL(serverUrl);
-        HttpURLConnection con = (HttpURLConnection) url.openConnection();
-
-        //add request header
-        con.setRequestMethod("POST");
-        con.setDoOutput(true); // para poder excribir
-        con.setDoInput(true); // para poder leer
-
-        try {
-            ObjectOutputStream objectOut = new ObjectOutputStream(con.getOutputStream());
-            objectOut.writeObject(data);
-
-            int responseCode = con.getResponseCode();
-            if (responseCode == 200){
-                //recibiremos un statusQuery
-                ObjectInputStream objectInput = new ObjectInputStream(con.getInputStream());
-                result = (Response)objectInput.readObject();
-            }else
-                throw new Exception();
-
-        }catch (Exception e){
-            result.setStatusQuery(CONNECTION_ERROR);
-        }
-
-        return result;
-    }
 
     public void showAlert (String title, String msg){
         AlertDialog alertDialog = new AlertDialog.Builder(MainGeoActivity.this,R.style.CustomAlert).create();
@@ -307,7 +229,7 @@ Función para enviar petición al servidor de eliminar la sessionId asignada a e
 
 
 
-    //TODO ===================================    MAPS ==========================================//
+    //TODO ===================================   MAPS   =========================================//
 
 
     @Override
@@ -342,7 +264,7 @@ Función para enviar petición al servidor de eliminar la sessionId asignada a e
 
         }catch (SecurityException ex){}
     }
-
+    //Genera el mapa dentro del fragmento de la actividad
     @Override
     public void onMapReady(GoogleMap googleMap) {
 
@@ -364,16 +286,23 @@ Función para enviar petición al servidor de eliminar la sessionId asignada a e
         mMap.setOnMarkerClickListener(this);
     }
 
+    //Que hacer cada vez que se modifica la localización
     @Override
     public void onLocationChanged(Location location) {
         //Cada vez que cambie la localización, actualizará la posicion actual y la enviará al servidor
         if (location !=null){
             this.location = location;
+            new serverLocationUpdate().execute();
             updateMarkers(location);
             //updateMyPosition(location);
         }
     }
 
+
+    /**
+     * Función que aplica transparencia según la cercania al mensaje
+     * @param: localización
+     */
     public void updateMarkers(Location location){
         for (Marker marker: markerList){
             if (distanceMarkerToLocation(marker,location)<=20){
@@ -383,7 +312,11 @@ Función para enviar petición al servidor de eliminar la sessionId asignada a e
         }
 
     }
-
+    /**
+     * Función que calcula la distancia entre un Marker (mensaje) y una localización
+     * @param: Marker, localización
+     * @return: distancia en decimal
+     */
     public float distanceMarkerToLocation(Marker mark, Location location){
         Location temp = new Location("Temp");
         temp.setLatitude(mark.getPosition().latitude);
@@ -436,6 +369,180 @@ Función para enviar petición al servidor de eliminar la sessionId asignada a e
     public void enableButton(){
         fab.setEnabled(true);
         fab.setAlpha(1f);
+    }
+
+
+    //TODO ===================================   Server Connections   =========================================//
+        /*
+Función para enviar petición al servidor de eliminar la sessionId asignada a este usuario
+ */
+    public class UserLogoutTask extends AsyncTask<Void, Void, Response> {
+
+
+        ProgressDialog mDialog = new ProgressDialog(MainGeoActivity.this);
+
+        @Override
+        protected Response doInBackground(Void... params) {
+
+            Response result = new Response();
+            Logout logoutData = new Logout();
+            logoutData.setSessionID(sharedPref.getInt("session",0));
+
+            try {
+                result =serverLogout(logoutData);
+            } catch (Exception e) {
+
+            }
+            return result;
+        }
+
+        @Override
+        protected void onPostExecute(final Response result) {
+            int status = result.getStatusQuery();
+
+            //Gestionamos la respuesta del servidor
+            if (status == result.LOGOUT_FAILED || status == CONNECTION_ERROR){
+                showAlert("Error", "Error finishing this session. Please try again");
+
+            }else if (status == result.LOGOUT_OK) {
+                Intent intent = new Intent(MainGeoActivity.this, LogReg.class);
+                // se eliminan todas las actividades y se inicia desde la pantalla de inicio/registro
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                editor.clear();
+                startActivity(intent);
+            }
+            mDialog.dismiss();
+        }
+
+        @Override
+        protected void onPreExecute() {
+            //Autenticando login...
+            mDialog.setMessage("Disconnecting...");
+            mDialog.show();
+        }
+    }
+
+
+    /**
+     * Función en segundo plano enviará petición al servidor para que elimine la sessionID
+     * @param: objeto Logout
+     * @return: objeto Response para verificar que el logout es correcto
+     */
+    public Response serverLogout ( Logout data) throws Exception{
+
+        String serverUrl = "http://ec2-52-31-205-76.eu-west-1.compute.amazonaws.com/geoechoserv";
+        Response result = new Response();
+        URL url = new URL(serverUrl);
+        HttpURLConnection con = (HttpURLConnection) url.openConnection();
+
+        //add request header
+        con.setRequestMethod("POST");
+        con.setDoOutput(true); // para poder excribir
+        con.setDoInput(true); // para poder leer
+
+        try {
+            ObjectOutputStream objectOut = new ObjectOutputStream(con.getOutputStream());
+            objectOut.writeObject(data);
+
+            int responseCode = con.getResponseCode();
+            if (responseCode == 200){
+                //recibiremos un statusQuery
+                ObjectInputStream objectInput = new ObjectInputStream(con.getInputStream());
+                result = (Response)objectInput.readObject();
+            }else
+                throw new Exception();
+
+        }catch (Exception e){
+            result.setStatusQuery(CONNECTION_ERROR);
+        }
+
+        return result;
+    }
+
+
+    public class serverLocationUpdate extends AsyncTask<Void, Void, List<Message>> {
+
+        @Override
+        protected List<Message> doInBackground(Void... params) {
+            List<Message> result = new ArrayList<Message>();
+            try {
+                //TODO conexión con el servidor
+                result=  updateServerMessageList(location);
+
+            } catch (Exception e) {
+                showAlert("Connection Error","Imposible to connect with server. Please try again");
+            }
+
+            return result;
+        }
+
+        @Override
+        protected void onPostExecute(final List<Message> result) {
+            //TODO Gestionamos la respuesta del servidor
+            if (result.size()>0){
+                markerList.clear();
+                for (Message temp: result){
+                    createMarkerFromMessage(temp);
+                }
+            }
+
+
+        }
+
+        @Override
+        protected void onPreExecute() {
+            //Algo ?
+        }
+    }
+    public void createMarkerFromMessage (Message message){
+        Marker temp;
+        temp= mMap.addMarker(new MarkerOptions()
+                .position(new LatLng(message.getCoordY(),message.getCoordX()))
+                .title(message.getDate().toString()).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
+        //.title("My GeoEcho").icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_newgeo)));
+        markerList.add(temp);
+    }
+
+    /**
+     * Función en segundo plano enviará petición al servidor para que elimine la sessionID
+     * @param: objeto Logout
+     * @return: objeto Response para verificar que el logout es correcto
+     */
+    public List<Message> updateServerMessageList (Location location) throws Exception{
+        String serverUrl = "http://ec2-52-31-205-76.eu-west-1.compute.amazonaws.com/geoechoserv";
+        ResponseQueryApp response = null;
+        List<Message> lista = new ArrayList<Message>();
+
+        QueryApp data = new QueryApp();
+        data.setCoordX((float)location.getLongitude());
+        data.setCoordY((float)location.getLatitude());
+        //data.setSe
+        //data.setSessionID(sharedPref.getInt("session",0));
+        data.setSessionID(1123259813);
+
+        URL url = new URL(serverUrl);
+        HttpURLConnection con = (HttpURLConnection) url.openConnection();
+
+        //add request header
+        con.setRequestMethod("POST");
+        con.setDoOutput(true); // para poder excribir
+        con.setDoInput(true); // para poder leer
+
+        try {
+            ObjectOutputStream objectOut = new ObjectOutputStream(con.getOutputStream());
+            objectOut.writeObject(data);
+            int responseCode = con.getResponseCode();
+            if (responseCode == 200) {
+                ObjectInputStream objectInput = new ObjectInputStream(con.getInputStream());
+                response = (ResponseQueryApp) objectInput.readObject();
+                lista = response.getMessageList();
+                //lista = (List<Message>) objectInput.readObject();
+            }
+        }catch (Exception e){
+        }
+
+        return lista;
+
     }
 
 }

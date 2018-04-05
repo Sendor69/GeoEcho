@@ -92,7 +92,6 @@ public class newMessage extends AppCompatActivity implements View.OnClickListene
                 new placeMessage().execute();
                 break;
         }
-
     }
 
     public Message generateMessage(){
@@ -232,6 +231,7 @@ public class newMessage extends AppCompatActivity implements View.OnClickListene
                 deleteFile();
             finish();
         }
+
         @Override
         protected void onPreExecute() {
             //Autenticando login...
