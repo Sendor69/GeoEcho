@@ -9,7 +9,6 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.graphics.PointF;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -97,7 +96,8 @@ public class newMessage extends AppCompatActivity implements View.OnClickListene
     }
 
     public Message generateMessage(){
-        PointF coordinates = new PointF(sharedPref.getFloat("Lat",0),sharedPref.getFloat("Long",0));
+        Float latitud = sharedPref.getFloat("Lat",0);
+        Float longitud = sharedPref.getFloat("Long",0);
         String text = messageText.getText().toString();
         String imageBase64 = photoBase64 ;
         String userSender = sharedPref.getString("user","");
@@ -109,7 +109,7 @@ public class newMessage extends AppCompatActivity implements View.OnClickListene
         boolean msgVisible = false;
         boolean msgReaded = false;
 
-        return new Message(coordinates,text,imageBase64,userSender, userReceiver, date, life, msgPublic, msgVisible, msgReaded);
+        return new Message(longitud,latitud,text,imageBase64,userSender, userReceiver, date, life, msgPublic, msgVisible, msgReaded);
     }
 
     public void addPhoto() {

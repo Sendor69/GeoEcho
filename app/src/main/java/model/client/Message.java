@@ -4,8 +4,6 @@ package model.client;
  * Created by Dani on 03/04/2018.
  */
 
-import android.graphics.PointF;
-
 import java.util.Date;
 
 /**
@@ -13,8 +11,8 @@ import java.util.Date;
  * @author Dani Machado
  */
 public class Message extends Packet {
-
-    protected PointF coordinates;
+    protected float coordX;
+    protected float coordY;
     protected String text;
     protected String photoBase64;
     protected String userSender;
@@ -33,7 +31,8 @@ public class Message extends Packet {
 
     /**
      * Constructor principal
-     * @param coordinates
+     * @param coordX
+     * @param coordY
      * @param text
      * @param photoBase64
      * @param userSender
@@ -44,8 +43,9 @@ public class Message extends Packet {
      * @param msgVisible
      * @param msgReaded
      */
-    public Message(PointF coordinates, String text, String photoBase64, String userSender, String userReceiver, Date date, int life, boolean msgPublic, boolean msgVisible, boolean msgReaded) {
-        this.coordinates = coordinates;
+    public Message(float coordX, float coordY, String text, String photoBase64, String userSender, String userReceiver, Date date, int life, boolean msgPublic, boolean msgVisible, boolean msgReaded) {
+        this.coordX = coordX;
+        this.coordY = coordY;
         this.text = text;
         this.photoBase64 = photoBase64;
         this.userSender = userSender;
@@ -58,19 +58,32 @@ public class Message extends Packet {
     }
 
     /**
-     * Getter coordinates
+     * Getter coordX
      * @return
      */
-    public PointF getCoordinates() {
-        return coordinates;
+    public float getCoordX() {
+        return coordX;
     }
-
     /**
-     * Setter coordinates
-     * @param coordinates
+     * Setter coordX
+     * @param coordX
      */
-    public void setCoordinates(PointF coordinates) {
-        this.coordinates = coordinates;
+    public void setCoordX(float coordX) {
+        this.coordX = coordX;
+    }
+    /**
+     * Getter coordY
+     * @return
+     */
+    public float getCoordY() {
+        return coordY;
+    }
+    /**
+     * Setter coordY
+     * @param coordY
+     */
+    public void setCoordY(float coordY) {
+        this.coordY = coordY;
     }
 
     /**

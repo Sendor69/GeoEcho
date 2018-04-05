@@ -33,17 +33,19 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
 
 import model.client.Logout;
 import model.client.Response;
 
-public class MainGeoActivity extends AppCompatActivity implements LocationListener, OnMapReadyCallback {
+public class MainGeoActivity extends AppCompatActivity implements LocationListener, OnMapReadyCallback, GoogleMap.OnMarkerClickListener {
 
     SharedPreferences sharedPref;
     SharedPreferences.Editor editor;
@@ -57,6 +59,7 @@ public class MainGeoActivity extends AppCompatActivity implements LocationListen
     SupportMapFragment mapFragment;
     MarkerOptions startMark;
     LatLng myPosition;
+    ArrayList<Marker> markerList;
 
     //Constantes
     public static final int CONNECTION_ERROR = -1;
@@ -96,6 +99,9 @@ public class MainGeoActivity extends AppCompatActivity implements LocationListen
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
+        //Inicializamos la lista de markers
+        markerList = new ArrayList<Marker>();
+
         //Por si no encontramos una posicion, mostraremos esto
         startMark = (new MarkerOptions()
                 .position(new LatLng(0,0))
@@ -104,6 +110,10 @@ public class MainGeoActivity extends AppCompatActivity implements LocationListen
 
         //Iniciamos la búsqueda de localizacion
         getLocation(gestorLoc);
+
+
+
+
 
 
     }
@@ -144,6 +154,7 @@ public class MainGeoActivity extends AppCompatActivity implements LocationListen
 
         return super.onOptionsItemSelected(item);
     }
+
 
     /*
 Función para enviar petición al servidor de eliminar la sessionId asignada a este usuario
@@ -282,16 +293,30 @@ Función para enviar petición al servidor de eliminar la sessionId asignada a e
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        Marker temp;
         if (requestCode == 0 && resultCode == RESULT_OK) {
-            mMap.addMarker(new MarkerOptions()
+            temp= mMap.addMarker(new MarkerOptions()
                     .position(new LatLng(sharedPref.getFloat("Lat",0),sharedPref.getFloat("Long",0)))
                     .title("My GeoEcho").icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
+                    //.title("My GeoEcho").icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_newgeo)));
+            markerList.add(temp);
         }
     }
 
 
 
+
+
     //TODO ===================================    MAPS ==========================================//
+
+
+    @Override
+    public boolean onMarkerClick(Marker m){
+        if (distanceMarkerToLocation(m,location)>=20){
+            //ToDo start activity para leer el mensaje
+        }
+        return true;
+    }
 
     public void getLocation(LocationManager gestor) {
         //Comprobará si tenim connexió GPS (precisa)
@@ -336,6 +361,7 @@ Función para enviar petición al servidor de eliminar la sessionId asignada a e
         }
         myPosition = new LatLng(latitud, longitud);
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(myPosition,16));
+        mMap.setOnMarkerClickListener(this);
     }
 
     @Override
@@ -343,8 +369,26 @@ Función para enviar petición al servidor de eliminar la sessionId asignada a e
         //Cada vez que cambie la localización, actualizará la posicion actual y la enviará al servidor
         if (location !=null){
             this.location = location;
+            updateMarkers(location);
             //updateMyPosition(location);
         }
+    }
+
+    public void updateMarkers(Location location){
+        for (Marker marker: markerList){
+            if (distanceMarkerToLocation(marker,location)<=20){
+                marker.setAlpha(1);
+            }else
+                marker.setAlpha(0.5f);
+        }
+
+    }
+
+    public float distanceMarkerToLocation(Marker mark, Location location){
+        Location temp = new Location("Temp");
+        temp.setLatitude(mark.getPosition().latitude);
+        temp.setLongitude(mark.getPosition().longitude);
+        return location.distanceTo(temp);
     }
 
     @Override
