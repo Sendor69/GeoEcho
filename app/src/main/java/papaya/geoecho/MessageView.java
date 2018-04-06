@@ -1,5 +1,7 @@
 package papaya.geoecho;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
@@ -11,6 +13,9 @@ import android.widget.TextView;
 
 public class MessageView extends AppCompatActivity {
 
+    SharedPreferences sharedPref;
+    SharedPreferences.Editor editor;
+
     String text, photo64;
     Bitmap imagen;
     ImageView imageView;
@@ -20,9 +25,14 @@ public class MessageView extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_message_view);
 
-        Bundle extras = getIntent().getExtras();
-        text = extras.getString("text");
-        photo64 = extras.getString("photo64");
+        sharedPref = getSharedPreferences("UserData", Context.MODE_PRIVATE);
+        editor = sharedPref.edit();
+
+
+        text = sharedPref.getString("textMessage","");
+        photo64 = sharedPref.getString("photo64","");
+        editor.remove("photo64");
+        editor.commit();
 
         imageView = (ImageView) findViewById(R.id.imgMessage);
         textView = (TextView) findViewById(R.id.textMessage);

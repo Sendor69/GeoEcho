@@ -233,11 +233,12 @@ public class MainGeoActivity extends AppCompatActivity implements LocationListen
         if (distanceMarkerToLocation(m,location)<=20){
             //ToDo start activity para leer el mensaje
             Intent i = new Intent (this, MessageView.class);
-            i.putExtra("text",m.getTitle());
-            if (m.getSnippet()!=null)
-                i.putExtra("photo64",m.getSnippet());
-            else
-                i.putExtra("photo64","EMPTY");
+            editor.putString("textMessage",m.getTitle());
+            if (m.getSnippet()!=null) {
+                editor.putString("photo64", m.getSnippet());
+            }else
+                editor.putString("photo64", "EMPTY");
+            editor.commit();
             startActivity(i);
         }
         return true;
@@ -497,15 +498,12 @@ Función para enviar petición al servidor de eliminar la sessionId asignada a e
         }
     }
     public void createMarkerFromMessage (Message message){
-        Marker temp;
-        int code = message.hashCode();
-        String tt = message.getText();
-        String texto = tt.toString();
-        temp= mMap.addMarker(new MarkerOptions()
-                .position(new LatLng(message.getCoordY(),message.getCoordX())).snippet(message.getPhotoBase64())
+        Marker temp = mMap.addMarker(new MarkerOptions()
+                .position(new LatLng(message.getCoordY(), message.getCoordX())).snippet(message.getPhotoBase64())
                 //.title(message.getText()).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
                 .title(message.getText()).icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_geodesactived)));
         markerList.add(temp);
+
     }
 
     /**

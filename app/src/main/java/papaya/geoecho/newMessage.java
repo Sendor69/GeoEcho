@@ -1,7 +1,6 @@
 package papaya.geoecho;
 
 import android.app.ProgressDialog;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -12,6 +11,7 @@ import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.StrictMode;
 import android.provider.MediaStore;
 import android.support.v7.app.AlertDialog;
@@ -58,6 +58,9 @@ public class newMessage extends AppCompatActivity implements View.OnClickListene
     //Test
     private ImageView imagen;
 
+    //Path imagen
+    private String dir;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,6 +86,9 @@ public class newMessage extends AppCompatActivity implements View.OnClickListene
 
         sharedPref = getSharedPreferences("UserData", Context.MODE_PRIVATE);
         editor = sharedPref.edit();
+
+        //Apuntamos a la memoria externa
+        dir = Environment.getExternalStorageDirectory().getAbsolutePath();
     }
 
     @Override
@@ -134,8 +140,8 @@ public class newMessage extends AppCompatActivity implements View.OnClickListene
         //Creamos un nombre único para el fichero
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
         String imageFileName = timeStamp;
-        File storageDir = getExternalFilesDir("TEMP");
-        //File storageDir = getCacheDir();
+        //File storageDir = getExternalFilesDir("TEMP");
+        File storageDir = new File(dir + "/" + "geoecho");
         if (!storageDir.exists()){
             storageDir.mkdir();
         }
@@ -155,16 +161,24 @@ public class newMessage extends AppCompatActivity implements View.OnClickListene
             case 0: //Cámara
                 if (resultCode == RESULT_OK) {
                     Uri photoUri = Uri.fromFile(photo);
+                    /*
                         // Amb el contentResolver accedim al contingut de l'activitat (imatge)
                         ContentResolver contRes = getContentResolver();
                         // Indiquem que el fitxer ha canviat
                         contRes.notifyChange(photoUri, null);
+
+                        */
                     Bitmap bitmap;
                     try {
-                        bitmap = android.provider.MediaStore.Images.Media
-                                .getBitmap(contRes, photoUri);
-                        photoBase64 = bitmapToBase64(bitmap);
+                        BitmapFactory.Options bmOptions = new BitmapFactory.Options();
+                        bitmap = BitmapFactory.decodeFile(photo.getPath(),bmOptions);
+                        int alt = (int) (bitmap.getHeight() * 500 / bitmap.getWidth());
+                        Bitmap mini = Bitmap.createScaledBitmap(bitmap, 500, alt, true);
+
+                        photoBase64 = bitmapToBase64(mini);
                         photoAdded.setVisibility(View.VISIBLE);
+                        bPhoto.setEnabled(false);
+                        bPhoto.setAlpha(0.5f);
                     } catch (Exception e) {
                         Toast.makeText(this, "Error loading photo" +
                                         photoUri.toString(),
