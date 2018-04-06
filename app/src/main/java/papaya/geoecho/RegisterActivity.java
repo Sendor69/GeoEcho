@@ -103,7 +103,7 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
                 showAlert("Register Failed", "Error creating account.");
             }else if (status == result.REGISTER_OK){
                 registerData.setSessionID(result.getSessionID());
-                Intent i = new Intent(RegisterActivity.this, MainActivity.class);
+                Intent i = new Intent(RegisterActivity.this, MainGeoActivity.class);
                 saveUserData(registerData);
                 startActivity(i);
             }else

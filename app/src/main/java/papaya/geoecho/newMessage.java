@@ -1,6 +1,5 @@
 package papaya.geoecho;
 
-import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -17,6 +16,7 @@ import android.os.StrictMode;
 import android.provider.MediaStore;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.text.InputFilter;
 import android.util.Base64;
 import android.view.View;
 import android.widget.Button;
@@ -72,6 +72,10 @@ public class newMessage extends AppCompatActivity implements View.OnClickListene
         photoAdded = (TextView)findViewById(R.id.image_added);
         messageText = (EditText)findViewById(R.id.text_message);
         imagen = (ImageView) findViewById(R.id.photo_added);
+
+        InputFilter[] FilterArray = new InputFilter[1];
+        FilterArray[0] = new InputFilter.LengthFilter(255);
+        messageText.setFilters(FilterArray);
 
         //Con este código se evita un error de Uri.fromFile en algunas versiones
         StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
@@ -131,6 +135,7 @@ public class newMessage extends AppCompatActivity implements View.OnClickListene
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
         String imageFileName = timeStamp;
         File storageDir = getExternalFilesDir("TEMP");
+        //File storageDir = getCacheDir();
         if (!storageDir.exists()){
             storageDir.mkdir();
         }
@@ -148,7 +153,7 @@ public class newMessage extends AppCompatActivity implements View.OnClickListene
         super.onActivityResult(requestCode, resultCode, data);
         switch (requestCode) {
             case 0: //Cámara
-                if (resultCode == Activity.RESULT_OK) {
+                if (resultCode == RESULT_OK) {
                     Uri photoUri = Uri.fromFile(photo);
                         // Amb el contentResolver accedim al contingut de l'activitat (imatge)
                         ContentResolver contRes = getContentResolver();
@@ -159,11 +164,7 @@ public class newMessage extends AppCompatActivity implements View.OnClickListene
                         bitmap = android.provider.MediaStore.Images.Media
                                 .getBitmap(contRes, photoUri);
                         photoBase64 = bitmapToBase64(bitmap);
-
-                        bitmap = base64ToBitmap(photoBase64);
-                        imagen.setImageBitmap(bitmap);
                         photoAdded.setVisibility(View.VISIBLE);
-
                     } catch (Exception e) {
                         Toast.makeText(this, "Error loading photo" +
                                         photoUri.toString(),
@@ -187,15 +188,15 @@ public class newMessage extends AppCompatActivity implements View.OnClickListene
     public class placeMessage extends AsyncTask<Void, Void, Response> {
 
         ProgressDialog mDialog = new ProgressDialog(newMessage.this);
-
+        Response result = null;
 
         @Override
         protected Response doInBackground(Void... params) {
             Response result = new Response();
             try {
                 //TODO conexión con el servidor
-                //result=  messageToServer(mensaje);
-                Thread.sleep(2000);
+                result=  messageToServer(mensaje);
+
             } catch (Exception e) {
                 showAlert("Connection Error","Imposible to connect with server. Please try again");
             }
@@ -206,30 +207,16 @@ public class newMessage extends AppCompatActivity implements View.OnClickListene
         @Override
         protected void onPostExecute(final Response result) {
             int status = result.getStatusQuery();
-
-            //TODO Gestionamos la respuesta del servidor
-
-            /*
-            if (status == result.LOGIN_FAILED){
-                showAlert("Authentication", "User or password are incorrects");
-
-            }else if (status == result.LOGIN_OK){
-                loginData.setSessionID(result.getSessionID());
-                Intent i = new Intent(LoginActivity.this, MainGeoActivity.class);
-                startActivity(i);
-
-            }else if (status == CONNECTION_ERROR){
-                showAlert("Error", "Server connection failed. Please try again");
-
-            }else
-                showAlert("Unkown Error", "Contact with administrator");
-                */
             mDialog.dismiss();
-            //Si ha ido bien
-            setResult(RESULT_OK);
-            if (photo != null)
-                deleteFile();
-            finish();
+            if (status == 11) {
+                //Si ha ido bien
+                setResult(RESULT_OK);
+                if (photo != null)
+                    deleteFile();
+                finish();
+            }
+            else
+                showAlert("Connection Error","Error placing the message. Please try again");
         }
 
         @Override
@@ -250,6 +237,7 @@ public class newMessage extends AppCompatActivity implements View.OnClickListene
         Response result = new Response();
         URL url = new URL(serverUrl);
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
+        data.setSessionID(sharedPref.getInt("session",0));
 
         //add request header
         con.setRequestMethod("POST");
@@ -268,6 +256,7 @@ public class newMessage extends AppCompatActivity implements View.OnClickListene
 
         }catch (Exception e){
             result = new Response();
+            result.setStatusQuery(Response.MESSAGE_FAILED);
         }
 
         return result;

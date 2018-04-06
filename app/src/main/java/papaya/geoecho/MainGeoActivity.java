@@ -215,13 +215,9 @@ public class MainGeoActivity extends AppCompatActivity implements LocationListen
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        Marker temp;
+        //Marker temp;
         if (requestCode == 0 && resultCode == RESULT_OK) {
-            temp= mMap.addMarker(new MarkerOptions()
-                    .position(new LatLng(sharedPref.getFloat("Lat",0),sharedPref.getFloat("Long",0)))
-                    .title("My GeoEcho").icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
-                    //.title("My GeoEcho").icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_newgeo)));
-            markerList.add(temp);
+            new serverLocationUpdate().execute();
         }
     }
 
@@ -234,8 +230,15 @@ public class MainGeoActivity extends AppCompatActivity implements LocationListen
 
     @Override
     public boolean onMarkerClick(Marker m){
-        if (distanceMarkerToLocation(m,location)>=20){
+        if (distanceMarkerToLocation(m,location)<=20){
             //ToDo start activity para leer el mensaje
+            Intent i = new Intent (this, MessageView.class);
+            i.putExtra("text",m.getTitle());
+            if (m.getSnippet()!=null)
+                i.putExtra("photo64",m.getSnippet());
+            else
+                i.putExtra("photo64","EMPTY");
+            startActivity(i);
         }
         return true;
     }
@@ -293,7 +296,6 @@ public class MainGeoActivity extends AppCompatActivity implements LocationListen
         if (location !=null){
             this.location = location;
             new serverLocationUpdate().execute();
-            updateMarkers(location);
             //updateMyPosition(location);
         }
     }
@@ -306,9 +308,9 @@ public class MainGeoActivity extends AppCompatActivity implements LocationListen
     public void updateMarkers(Location location){
         for (Marker marker: markerList){
             if (distanceMarkerToLocation(marker,location)<=20){
-                marker.setAlpha(1);
+                marker.setIcon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_geoactived));
             }else
-                marker.setAlpha(0.5f);
+                marker.setIcon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_geodesactived));
         }
 
     }
@@ -342,22 +344,20 @@ public class MainGeoActivity extends AppCompatActivity implements LocationListen
                 break;
         }
 
-        Toast.makeText(getApplicationContext(),
-                missatge,
-                Toast.LENGTH_LONG).show();
+        //Toast.makeText(getApplicationContext(),missatge,Toast.LENGTH_LONG).show();
     }
 
     @Override
     public void onProviderEnabled(String provider) {
         //Si el GPS està actiu.. .
-        Toast.makeText(this,"GPS active. Looking for location...",Toast.LENGTH_SHORT).show();
+     //   Toast.makeText(this,"GPS active. Looking for location...",Toast.LENGTH_SHORT).show();
         enableButton();
     }
 
     @Override
     public void onProviderDisabled(String provider) {
         //Si desactivem el GPS manualment
-        Toast.makeText(this,"GPS desactivated",Toast.LENGTH_SHORT).show();
+       // Toast.makeText(this,"GPS desactivated",Toast.LENGTH_SHORT).show();
         disableButton();
         location = null;
     }
@@ -479,14 +479,16 @@ Función para enviar petición al servidor de eliminar la sessionId asignada a e
         @Override
         protected void onPostExecute(final List<Message> result) {
             //TODO Gestionamos la respuesta del servidor
-            if (result.size()>0){
-                markerList.clear();
-                for (Message temp: result){
-                    createMarkerFromMessage(temp);
+            if (result !=null) {
+                if (result.size() > 0) {
+                    markerList.clear();
+                    mMap.clear();
+                    for (Message temp : result) {
+                        createMarkerFromMessage(temp);
+                    }
                 }
+                updateMarkers(location);
             }
-
-
         }
 
         @Override
@@ -496,10 +498,13 @@ Función para enviar petición al servidor de eliminar la sessionId asignada a e
     }
     public void createMarkerFromMessage (Message message){
         Marker temp;
+        int code = message.hashCode();
+        String tt = message.getText();
+        String texto = tt.toString();
         temp= mMap.addMarker(new MarkerOptions()
-                .position(new LatLng(message.getCoordY(),message.getCoordX()))
-                .title(message.getDate().toString()).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
-        //.title("My GeoEcho").icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_newgeo)));
+                .position(new LatLng(message.getCoordY(),message.getCoordX())).snippet(message.getPhotoBase64())
+                //.title(message.getText()).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
+                .title(message.getText()).icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_geodesactived)));
         markerList.add(temp);
     }
 
@@ -516,9 +521,8 @@ Función para enviar petición al servidor de eliminar la sessionId asignada a e
         QueryApp data = new QueryApp();
         data.setCoordX((float)location.getLongitude());
         data.setCoordY((float)location.getLatitude());
-        //data.setSe
-        //data.setSessionID(sharedPref.getInt("session",0));
-        data.setSessionID(1123259813);
+        data.setSessionID(sharedPref.getInt("session",0));
+        //data.setSessionID(1123259813);
 
         URL url = new URL(serverUrl);
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
