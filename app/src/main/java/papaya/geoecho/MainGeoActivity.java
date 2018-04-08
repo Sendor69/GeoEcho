@@ -25,7 +25,6 @@ import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -61,7 +60,7 @@ public class MainGeoActivity extends AppCompatActivity implements LocationListen
     private double longitud = 0.0;
     private double latitud = 0.0;
     SupportMapFragment mapFragment;
-    MarkerOptions startMark;
+    //MarkerOptions startMark;
     LatLng myPosition;
     ArrayList<Marker> markerList;
 
@@ -89,6 +88,7 @@ public class MainGeoActivity extends AppCompatActivity implements LocationListen
                     Intent i = new Intent(getApplicationContext(), newMessage.class);
                     startActivityForResult(i,0);
                 }
+
             }
         });
 
@@ -107,10 +107,12 @@ public class MainGeoActivity extends AppCompatActivity implements LocationListen
         markerList = new ArrayList<Marker>();
 
         //Por si no encontramos una posicion, mostraremos esto
+        /*
         startMark = (new MarkerOptions()
                 .position(new LatLng(0,0))
                 .title("Papaya TEAM!")
                 .snippet("Searching your position!"));
+                */
 
         //Iniciamos la búsqueda de localizacion
         getLocation(gestorLoc);
@@ -148,7 +150,8 @@ public class MainGeoActivity extends AppCompatActivity implements LocationListen
                 break;
             case R.id.action_map:
                 break;
-            case R.id.action_profile:
+            case R.id.action_refresh:
+                new serverLocationUpdate().execute();
                 break;
             case R.id.item_all:
                 break;
@@ -264,7 +267,7 @@ public class MainGeoActivity extends AppCompatActivity implements LocationListen
                 }
             }else
                 disableButton();
-                Toast.makeText(this,"Please connect GPS to get location",Toast.LENGTH_SHORT).show();
+                //Toast.makeText(this,"Please connect GPS to get location",Toast.LENGTH_SHORT).show();
 
         }catch (SecurityException ex){}
     }
@@ -280,7 +283,8 @@ public class MainGeoActivity extends AppCompatActivity implements LocationListen
         }
 
         if (location == null) {
-            mMap.addMarker(startMark);
+            //mMap.addMarker(startMark);
+            //No haremos nada hasta que se encuentre la localización
         }else{
             latitud = location.getLatitude();
             longitud = location.getLongitude();
@@ -501,11 +505,17 @@ Función para enviar petición al servidor de eliminar la sessionId asignada a e
         Marker temp = mMap.addMarker(new MarkerOptions()
                 .position(new LatLng(message.getCoordY(), message.getCoordX())).snippet(message.getPhotoBase64())
                 //.title(message.getText()).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
-                .title(message.getText()).icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_geodesactived)));
+                .title(formatMessage(message)).icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_geodesactived)));
         markerList.add(temp);
 
     }
 
+    public String formatMessage(Message message){
+        return "Data: "+message.getDate().toString() + "\n"
+                + "User: " +message.getUserSender().toString() + "\n\n"
+                + "Message: " + message.getText();
+
+    }
     /**
      * Función en segundo plano enviará petición al servidor para que elimine la sessionID
      * @param: objeto Logout

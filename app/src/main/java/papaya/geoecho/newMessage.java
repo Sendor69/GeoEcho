@@ -67,6 +67,9 @@ public class newMessage extends AppCompatActivity implements View.OnClickListene
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_new_message);
 
+        sharedPref = getSharedPreferences("UserData", Context.MODE_PRIVATE);
+        editor = sharedPref.edit();
+
         bPhoto = (Button)findViewById(add_photo);
         bPhoto.setOnClickListener(this);
         bSend = (Button)findViewById(R.id.send_message);
@@ -76,6 +79,7 @@ public class newMessage extends AppCompatActivity implements View.OnClickListene
         messageText = (EditText)findViewById(R.id.text_message);
         imagen = (ImageView) findViewById(R.id.photo_added);
 
+        //Limitamos el texto a 255 characteres para que entre en la base de datos
         InputFilter[] FilterArray = new InputFilter[1];
         FilterArray[0] = new InputFilter.LengthFilter(255);
         messageText.setFilters(FilterArray);
@@ -83,9 +87,6 @@ public class newMessage extends AppCompatActivity implements View.OnClickListene
         //Con este código se evita un error de Uri.fromFile en algunas versiones
         StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
         StrictMode.setVmPolicy(builder.build());
-
-        sharedPref = getSharedPreferences("UserData", Context.MODE_PRIVATE);
-        editor = sharedPref.edit();
 
         //Apuntamos a la memoria externa
         dir = Environment.getExternalStorageDirectory().getAbsolutePath();

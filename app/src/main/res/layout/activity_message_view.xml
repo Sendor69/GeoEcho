@@ -29,8 +29,10 @@
             android:visibility="visible">
 
             <LinearLayout
+                android:id="@+id/layout_text"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_gravity="left"
                 android:orientation="vertical">
 
                 <TextView
@@ -52,7 +54,8 @@
             android:id="@+id/imgMessage"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="1"
+            android:layout_weight="2"
+            android:adjustViewBounds="false"
             app:srcCompat="@android:drawable/checkbox_off_background" />
 
     </LinearLayout>
