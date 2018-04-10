@@ -50,6 +50,7 @@ import model.client.ResponseQueryApp;
 
 public class MainGeoActivity extends AppCompatActivity implements LocationListener, OnMapReadyCallback, GoogleMap.OnMarkerClickListener {
 
+    //Gestor sharedPreferences
     SharedPreferences sharedPref;
     SharedPreferences.Editor editor;
 
@@ -60,7 +61,6 @@ public class MainGeoActivity extends AppCompatActivity implements LocationListen
     private double longitud = 0.0;
     private double latitud = 0.0;
     SupportMapFragment mapFragment;
-    //MarkerOptions startMark;
     LatLng myPosition;
     ArrayList<Marker> markerList;
 
@@ -81,6 +81,7 @@ public class MainGeoActivity extends AppCompatActivity implements LocationListen
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                //Iniciaremos la actividad de nuevo mensaje, enviandole la localización actual
                 if (location != null) {
                     editor.putFloat("Lat",(float)location.getLatitude());
                     editor.putFloat("Long",(float)location.getLongitude());
@@ -106,31 +107,23 @@ public class MainGeoActivity extends AppCompatActivity implements LocationListen
         //Inicializamos la lista de markers
         markerList = new ArrayList<Marker>();
 
-        //Por si no encontramos una posicion, mostraremos esto
-        /*
-        startMark = (new MarkerOptions()
-                .position(new LatLng(0,0))
-                .title("Papaya TEAM!")
-                .snippet("Searching your position!"));
-                */
-
-        //Iniciamos la búsqueda de localizacion
+        //Iniciamos la búsqueda de localización
         getLocation(gestorLoc);
-
-
-
-
-
 
     }
 
+    /**
+     * Añade los items al menú de la action bar
+     */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.geo_menu, menu);
         return true;
     }
 
+    /**
+     * Función para gestionar que ha de hacer cada botón del menú de la action bar
+     */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
@@ -149,21 +142,21 @@ public class MainGeoActivity extends AppCompatActivity implements LocationListen
                 new UserLogoutTask().execute();
                 break;
             case R.id.action_map:
+                //nada
                 break;
             case R.id.action_refresh:
                 new serverLocationUpdate().execute();
                 break;
             case R.id.item_all:
+                //TODO Filtro de mensajes
                 break;
             case R.id.item_publics:
+                //TODO Filtro de mensajes
                 break;
         }
 
         return super.onOptionsItemSelected(item);
     }
-
-
-
 
     /*
     Función que mostrará un mensaje de si/no preguntando si se quiere cerrar la sesión
@@ -184,7 +177,7 @@ public class MainGeoActivity extends AppCompatActivity implements LocationListen
                 }
             }
         };
-
+        //Generamos el texto de aviso con un alertDialog
         AlertDialog.Builder ab = new AlertDialog.Builder(MainGeoActivity.this,R.style.CustomAlert);
         ab.setMessage("You will finalize your session. Are you sure?").setPositiveButton("Yes", dialogClickListener)
                 .setNegativeButton("No", dialogClickListener).setTitle("LoginActivity out");
@@ -207,7 +200,11 @@ public class MainGeoActivity extends AppCompatActivity implements LocationListen
         return super.onKeyDown(keyCode, event);
     }
 
-
+    /**
+     * Función para mostrar un mensaje de alerta personalizado
+     * @param: string
+     * @return: objeto AlertDialog
+     */
     public void showAlert (String title, String msg){
         AlertDialog alertDialog = new AlertDialog.Builder(MainGeoActivity.this,R.style.CustomAlert).create();
         alertDialog.setTitle(title);
@@ -218,8 +215,8 @@ public class MainGeoActivity extends AppCompatActivity implements LocationListen
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        //Marker temp;
         if (requestCode == 0 && resultCode == RESULT_OK) {
+            //si el resultado es correcto, actualizamos el mapa
             new serverLocationUpdate().execute();
         }
     }
@@ -228,9 +225,12 @@ public class MainGeoActivity extends AppCompatActivity implements LocationListen
 
 
 
-    //TODO ===================================   MAPS   =========================================//
+    //===================================   MAPS   =========================================//
 
-
+    /*
+    *Función onClick de los markers modificada, controlaremos que la distancia sea la necesaria para
+    * poder mostrar el mensaje al usuario. Si lo es, cargaremos el mensaje en otra actividad para verlo
+   */
     @Override
     public boolean onMarkerClick(Marker m){
         if (distanceMarkerToLocation(m,location)<=20){
@@ -246,7 +246,9 @@ public class MainGeoActivity extends AppCompatActivity implements LocationListen
         }
         return true;
     }
-
+      /*
+      * Función automática de android para coger la localización mediante el GPS
+       */
     public void getLocation(LocationManager gestor) {
         //Comprobará si tenim connexió GPS (precisa)
         boolean isGPSEnabled = gestor
@@ -271,19 +273,21 @@ public class MainGeoActivity extends AppCompatActivity implements LocationListen
 
         }catch (SecurityException ex){}
     }
-    //Genera el mapa dentro del fragmento de la actividad
+
+    /*
+    *Genera el mapa dentro del fragmento de la actividad
+   */
     @Override
     public void onMapReady(GoogleMap googleMap) {
 
         mMap = googleMap;
-        //Codigo para activar la localización del dispositivo con el punto azul
+        //Codigo para activar la localización del dispositivo con el punto azul, el tracker
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED) {
             mMap.setMyLocationEnabled(true);
         }
 
         if (location == null) {
-            //mMap.addMarker(startMark);
             //No haremos nada hasta que se encuentre la localización
         }else{
             latitud = location.getLatitude();
@@ -294,7 +298,9 @@ public class MainGeoActivity extends AppCompatActivity implements LocationListen
         mMap.setOnMarkerClickListener(this);
     }
 
-    //Que hacer cada vez que se modifica la localización
+    /**
+     * Usaremos esta función para recargar el mapa cada vez que la localización sea diferente
+     */
     @Override
     public void onLocationChanged(Location location) {
         //Cada vez que cambie la localización, actualizará la posicion actual y la enviará al servidor
@@ -331,6 +337,10 @@ public class MainGeoActivity extends AppCompatActivity implements LocationListen
         return location.distanceTo(temp);
     }
 
+    /**
+     * Funciones sobreescritas de google Maps para controlar el estado de la conexión GPS
+     * Las usaremos para habilitar o deshabilitar el botón del nuevo mensaje
+     */
     @Override
     public void onStatusChanged(String provider, int status, Bundle extras) {
         String missatge = "";
@@ -367,6 +377,9 @@ public class MainGeoActivity extends AppCompatActivity implements LocationListen
         location = null;
     }
 
+    /**
+     * Funciones que habilitan o deshabilitan el botón para crear nuevos mensajes
+     */
     public void disableButton(){
         fab.setEnabled(false);
         fab.setAlpha(0.3f);
@@ -377,10 +390,13 @@ public class MainGeoActivity extends AppCompatActivity implements LocationListen
     }
 
 
-    //TODO ===================================   Server Connections   =========================================//
-        /*
-Función para enviar petición al servidor de eliminar la sessionId asignada a este usuario
- */
+    //===================================   Server Connections   =========================================//
+    /**
+     * Función en un hilo a parte  para enviar petición al servidor de eliminar la sessionId asignada
+     * a este usuario.
+     *  @param: Logout class
+     *  @return: Response class
+     */
     public class UserLogoutTask extends AsyncTask<Void, Void, Response> {
 
 
@@ -464,7 +480,12 @@ Función para enviar petición al servidor de eliminar la sessionId asignada a e
         return result;
     }
 
-
+    /**
+     * Función en un hilo a parte  para enviar la localización actual al servidor, y que este nos
+     * devuelva una lista con todos los mensajes cercanos
+     * @param: location
+     * @return: List<Message>
+     */
     public class serverLocationUpdate extends AsyncTask<Void, Void, List<Message>> {
 
         @Override
@@ -501,15 +522,25 @@ Función para enviar petición al servidor de eliminar la sessionId asignada a e
             //Algo ?
         }
     }
+
+    /**
+     * Función que transformará los mensajes enviados por el servidor en markers clickables en el mapa
+     * @param: message
+     * @return: creará los markers del mapa
+     */
     public void createMarkerFromMessage (Message message){
         Marker temp = mMap.addMarker(new MarkerOptions()
                 .position(new LatLng(message.getCoordY(), message.getCoordX())).snippet(message.getPhotoBase64())
                 //.title(message.getText()).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
                 .title(formatMessage(message)).icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_geodesactived)));
         markerList.add(temp);
-
     }
 
+    /**
+     * Formateo del mensaje para mostrarlo correctamente al usuario
+     * @param: message
+     * @return: String con el texto ya formateado
+     */
     public String formatMessage(Message message){
         return "Data: "+message.getDate().toString() + "\n"
                 + "User: " +message.getUserSender().toString() + "\n\n"

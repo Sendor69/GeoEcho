@@ -104,7 +104,11 @@ public class newMessage extends AppCompatActivity implements View.OnClickListene
                 break;
         }
     }
-
+    /**
+     * Función que genera un objeto Message con los datos necesarios, obtenidos del usuario
+     * @param: introdución del user
+     * @return: objeto Message
+     */
     public Message generateMessage(){
         Float latitud = sharedPref.getFloat("Lat",0);
         Float longitud = sharedPref.getFloat("Long",0);
@@ -121,7 +125,10 @@ public class newMessage extends AppCompatActivity implements View.OnClickListene
 
         return new Message(longitud,latitud,text,imageBase64,userSender, userReceiver, date, life, msgPublic, msgVisible, msgReaded);
     }
-
+    /**
+     * Función que genera un fichero y una vez creado correctamente inicializará la cámara enviandole
+     * como parametro el Uri del fichero.
+     */
     public void addPhoto() {
         // Intent para la cámara
         Intent intent = new Intent("android.media.action.IMAGE_CAPTURE");
@@ -136,7 +143,10 @@ public class newMessage extends AppCompatActivity implements View.OnClickListene
         //Activity cámara
         startActivityForResult(intent, 0);
     }
-
+    /**
+     * Función que crea el fichero con un nombre único basado en unos parámetros predefinidos
+     * @return: objeto File
+     */
     private File createImageFile() throws IOException {
         //Creamos un nombre único para el fichero
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
@@ -154,23 +164,21 @@ public class newMessage extends AppCompatActivity implements View.OnClickListene
         return image;
     }
 
+    /**
+     * Activity que gestionará el resultado de la cámara de fotos
+     * @param: requestCode, resultCode, data
+     */
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        // Primer cridem al mètode d'Activity per que faci la seva tasca
         super.onActivityResult(requestCode, resultCode, data);
         switch (requestCode) {
             case 0: //Cámara
                 if (resultCode == RESULT_OK) {
                     Uri photoUri = Uri.fromFile(photo);
-                    /*
-                        // Amb el contentResolver accedim al contingut de l'activitat (imatge)
-                        ContentResolver contRes = getContentResolver();
-                        // Indiquem que el fitxer ha canviat
-                        contRes.notifyChange(photoUri, null);
-
-                        */
                     Bitmap bitmap;
                     try {
+                        //Vamos a buscar el fichero creado anteriormente para transformarlo en bitmap
+                        //El fichero se comprimirá.
                         BitmapFactory.Options bmOptions = new BitmapFactory.Options();
                         bitmap = BitmapFactory.decodeFile(photo.getPath(),bmOptions);
                         int alt = (int) (bitmap.getHeight() * 500 / bitmap.getWidth());
@@ -195,9 +203,8 @@ public class newMessage extends AppCompatActivity implements View.OnClickListene
         }
     }
 
-        /*
-    Función AsyncTask que en segundo plano connectarà con el servidor, validarà el usuario y lanzará
-        la actividad principal, pasandole los datos del usuario y el sessionID
+    /**
+     * Función en segundo plano que enviará el mensaje generado al servidor para hacerlo público
      */
 
     public class placeMessage extends AsyncTask<Void, Void, Response> {
@@ -209,13 +216,10 @@ public class newMessage extends AppCompatActivity implements View.OnClickListene
         protected Response doInBackground(Void... params) {
             Response result = new Response();
             try {
-                //TODO conexión con el servidor
                 result=  messageToServer(mensaje);
-
             } catch (Exception e) {
                 showAlert("Connection Error","Imposible to connect with server. Please try again");
             }
-
             return result;
         }
 
@@ -223,6 +227,11 @@ public class newMessage extends AppCompatActivity implements View.OnClickListene
         protected void onPostExecute(final Response result) {
             int status = result.getStatusQuery();
             mDialog.dismiss();
+
+            /**
+             * Si el servidor devuelve 11 quiere decir que el mensaje se ha guardado correctamente.
+             * Una vez finalizado, se eliminará el fichero de la imagen
+             */
             if (status == 11) {
                 //Si ha ido bien
                 setResult(RESULT_OK);
@@ -245,7 +254,7 @@ public class newMessage extends AppCompatActivity implements View.OnClickListene
     /**
      * Función en segundo plano que connectarà con el servidor y enviará el mensaje
      * @param: objeto Message
-     * @return: devolverá un objeto Response para saber si se ha podido enviar todo bien
+     * @return: devolverá un objeto Response para saber si se ha podido enviar correctamente
      */
     public Response messageToServer (Message data) throws Exception{
         String serverUrl = "http://ec2-52-31-205-76.eu-west-1.compute.amazonaws.com/geoechoserv";
@@ -277,7 +286,11 @@ public class newMessage extends AppCompatActivity implements View.OnClickListene
         return result;
     }
 
-
+    /**
+     * Función para eliminar un fichero
+     * @param: Uri del archivo photo
+     * @return: si se elimina correctamente no muestra nada
+     */
     public void deleteFile(){
         Uri uri = Uri.fromFile(photo);
         File fdelete = new File(uri.getPath());
@@ -312,16 +325,6 @@ public class newMessage extends AppCompatActivity implements View.OnClickListene
         byte[] b = baos.toByteArray();
         String imageEncoded = Base64.encodeToString(b,Base64.DEFAULT);
         return imageEncoded;
-    }
-    /**
-     * Función que convierte un string Base64 en bitmap
-     * @param: string Base64
-     * @return: devolverá objeto bitmap
-     */
-    public static Bitmap base64ToBitmap(String input)
-    {
-        byte[] decodedByte = Base64.decode(input, 0);
-        return BitmapFactory.decodeByteArray(decodedByte, 0, decodedByte.length);
     }
 
     /**

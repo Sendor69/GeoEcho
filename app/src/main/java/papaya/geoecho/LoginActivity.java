@@ -29,7 +29,6 @@ import static papaya.geoecho.R.id.tRecordar;
 
 
 public class LoginActivity extends AppCompatActivity implements View.OnClickListener {
-        //Referencias UI
 
     private Button login;
     private EditText user,password;
@@ -46,22 +45,16 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-
+        //Referencias UI
         login = (Button) findViewById(bLogin);
         login.setOnClickListener(this);
         user = (EditText)findViewById(R.id.eUsername);
         password = (EditText) findViewById(R.id.ePasword);
         loginData = new LoginApp();
 
+        //Creamos un shared preferences UserData para cambiar datos de una activity a otra
         sharedPref = getSharedPreferences("UserData", Context.MODE_PRIVATE);
         editor = sharedPref.edit();
-
-
-
-        /*//TODO Para Implementar en los siguientes TEA
-        forgotPass = (TextView) findViewById(tRecordar);
-        forgotPass.setOnClickListener(this);
-        */
 
     }
 

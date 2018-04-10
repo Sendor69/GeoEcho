@@ -16,7 +16,7 @@ import static papaya.geoecho.R.id.rRegister;
 public class LogReg extends AppCompatActivity implements View.OnClickListener {
 
 
-    //Permisos que demanarem
+    //Permisos que pediremos al usuario
     private final int ALL_PERMISSION = 123;
     private String[] permisosFitxer = new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE,
             Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.CAMERA};
