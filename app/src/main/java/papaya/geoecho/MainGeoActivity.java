@@ -64,9 +64,14 @@ public class MainGeoActivity extends AppCompatActivity implements LocationListen
     LatLng myPosition;
     ArrayList<Marker> markerList;
 
+    //Variable para mostrar públicos
+    private String filter = FILTER_ALL;
+
     //Constantes
     public static final int CONNECTION_ERROR = -1;
-
+    public static final String FILTER_ALL = "ALL";
+    public static final String FILTER_PUBLIC = "PUBLIC";
+    public static final String FILTER_PRIVATE = "PRIVATE";
     FloatingActionButton fab;
 
     @Override
@@ -148,10 +153,16 @@ public class MainGeoActivity extends AppCompatActivity implements LocationListen
                 new serverLocationUpdate().execute();
                 break;
             case R.id.item_all:
-                //TODO Filtro de mensajes
+                filter = FILTER_ALL;
+                markerFilter(filter);
                 break;
             case R.id.item_publics:
-                //TODO Filtro de mensajes
+                filter = FILTER_PUBLIC;
+                markerFilter(filter);
+                break;
+            case R.id.item_privates:
+                filter = FILTER_PRIVATE;
+                markerFilter(filter);
                 break;
         }
 
@@ -218,6 +229,37 @@ public class MainGeoActivity extends AppCompatActivity implements LocationListen
         if (requestCode == 0 && resultCode == RESULT_OK) {
             //si el resultado es correcto, actualizamos el mapa
             new serverLocationUpdate().execute();
+        }
+    }
+
+    /**
+     * Función para filtrar los mensajes según el usuario elija
+     * @param: string
+     */
+    public void markerFilter (String filter){
+        switch (filter){
+            case FILTER_ALL:
+                for (Marker marker: markerList){
+                    marker.setVisible(true);
+                }
+                break;
+            case FILTER_PUBLIC:
+                for (Marker marker: markerList){
+                    if (marker.isDraggable()){
+                        marker.setVisible(true);
+                    }else
+                        marker.setVisible(false);
+                }
+                break;
+            case FILTER_PRIVATE:
+                for (Marker marker: markerList){
+                    if (marker.isDraggable()){
+                        marker.setVisible(false);
+                    }else
+                        marker.setVisible(true);
+                }
+                break;
+
         }
     }
 
@@ -514,6 +556,7 @@ public class MainGeoActivity extends AppCompatActivity implements LocationListen
                     }
                 }
                 updateMarkers(location);
+                markerFilter(filter);
             }
         }
 
@@ -529,8 +572,9 @@ public class MainGeoActivity extends AppCompatActivity implements LocationListen
      * @return: creará los markers del mapa
      */
     public void createMarkerFromMessage (Message message){
+
         Marker temp = mMap.addMarker(new MarkerOptions()
-                .position(new LatLng(message.getCoordY(), message.getCoordX())).snippet(message.getPhotoBase64())
+                .position(new LatLng(message.getCoordY(), message.getCoordX())).snippet(message.getPhotoBase64()).draggable(message.isMsgPublic())
                 //.title(message.getText()).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
                 .title(formatMessage(message)).icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_geodesactived)));
         markerList.add(temp);

@@ -14,6 +14,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.StrictMode;
 import android.provider.MediaStore;
+import android.support.constraint.ConstraintLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.text.InputFilter;
@@ -22,6 +23,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.RadioButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -40,6 +42,8 @@ import model.client.Message;
 import model.client.Response;
 
 import static papaya.geoecho.R.id.add_photo;
+import static papaya.geoecho.R.id.radio_private;
+import static papaya.geoecho.R.id.radio_public;
 import static papaya.geoecho.R.id.send_message;
 
 public class newMessage extends AppCompatActivity implements View.OnClickListener {
@@ -49,11 +53,14 @@ public class newMessage extends AppCompatActivity implements View.OnClickListene
 
     //UI elements
     private Button bPhoto, bSend;
+    private RadioButton rbPublic, rbPrivate;
     private TextView photoAdded;
-    private EditText messageText;
+    private EditText messageText, messagePrivateUser;
     private String photoBase64;
     private File photo;
     private Message mensaje;
+    private ConstraintLayout l_privateUser;
+
 
     //Test
     private ImageView imagen;
@@ -74,9 +81,15 @@ public class newMessage extends AppCompatActivity implements View.OnClickListene
         bPhoto.setOnClickListener(this);
         bSend = (Button)findViewById(R.id.send_message);
         bSend.setOnClickListener(this);
+        rbPublic = (RadioButton) findViewById(R.id.radio_public);
+        rbPublic.setOnClickListener(this);
+        rbPrivate = (RadioButton) findViewById(R.id.radio_private);
+        rbPrivate.setOnClickListener(this);
+        l_privateUser = (ConstraintLayout)findViewById(R.id.layout_privateUser);
 
         photoAdded = (TextView)findViewById(R.id.image_added);
         messageText = (EditText)findViewById(R.id.text_message);
+        messagePrivateUser = (EditText)findViewById(R.id.text_sendTo);
         imagen = (ImageView) findViewById(R.id.photo_added);
 
         //Limitamos el texto a 255 characteres para que entre en la base de datos
@@ -102,6 +115,16 @@ public class newMessage extends AppCompatActivity implements View.OnClickListene
                 mensaje = generateMessage();
                 new placeMessage().execute();
                 break;
+            case radio_private:
+                rbPublic.setChecked(false);
+                l_privateUser.setVisibility(View.VISIBLE);
+                break;
+            case radio_public:
+                rbPrivate.setChecked(false);
+                messagePrivateUser.setText("");
+                Boolean test = messagePrivateUser.getText().toString().trim().equals("") ? true : false ;
+                l_privateUser.setVisibility(View.GONE);
+                break;
         }
     }
     /**
@@ -115,12 +138,11 @@ public class newMessage extends AppCompatActivity implements View.OnClickListene
         String text = messageText.getText().toString();
         String imageBase64 = photoBase64 ;
         String userSender = sharedPref.getString("user","");
-        String userReceiver = null;
+        String userReceiver = messagePrivateUser.getText().toString();
         Date date = Calendar.getInstance().getTime();
-        // ToDo revisar si he de enviarlo yo
         int life = 10;
-        boolean msgPublic = true;
-        boolean msgVisible = false;
+        boolean msgPublic = messagePrivateUser.getText().toString().equals("") ? true : false ;
+        boolean msgVisible = true;
         boolean msgReaded = false;
 
         return new Message(longitud,latitud,text,imageBase64,userSender, userReceiver, date, life, msgPublic, msgVisible, msgReaded);
