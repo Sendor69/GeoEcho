@@ -1,6 +1,7 @@
 package papaya.geoecho;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -11,15 +12,17 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import model.client.Message;
+
 public class MessageView extends AppCompatActivity {
 
     SharedPreferences sharedPref;
     SharedPreferences.Editor editor;
 
-    String text, photo64;
+    Message message;
     Bitmap imagen;
     ImageView imageView;
-    TextView textView;
+    TextView textMessage, dataMessage, userMessage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,25 +33,27 @@ public class MessageView extends AppCompatActivity {
         sharedPref = getSharedPreferences("UserData", Context.MODE_PRIVATE);
         editor = sharedPref.edit();
 
+        Intent i = getIntent();
+        message = (Message) getIntent().getSerializableExtra("Message");
 
-        text = sharedPref.getString("textMessage","");
-        photo64 = sharedPref.getString("photo64","");
-        editor.remove("photo64");
-        editor.commit();
 
         imageView = (ImageView) findViewById(R.id.imgMessage);
-        textView = (TextView) findViewById(R.id.textMessage);
+        textMessage = (TextView) findViewById(R.id.textMessage);
+        dataMessage = (TextView) findViewById(R.id.dataMessage);
+        userMessage = (TextView) findViewById(R.id.userMessage);
 
         //Comprobamos si tenemos imagen para este mensaje
-        if (photo64.equals("EMPTY")){
+        if (message.getPhotoBase64() == null){
             //La imageView pasara a gone
             imageView.setVisibility(View.GONE);
         }else{
             //Si la tenemos, la transformamos en bitmap y la asignamos al imageView
-            imagen = base64ToBitmap(photo64);
+            imagen = base64ToBitmap(message.getPhotoBase64());
             imageView.setImageBitmap(imagen);
         }
-        textView.setText(text);
+        textMessage.setText(message.getText());
+        userMessage.setText("User: " + message.getUserSender());
+        dataMessage.setText("Data: " + message.getDate().toString());
 
     }
 

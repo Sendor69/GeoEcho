@@ -67,6 +67,9 @@ public class MainGeoActivity extends AppCompatActivity implements LocationListen
     //Variable para mostrar públicos
     private String filter = FILTER_ALL;
 
+    //Lista de mensajes global
+    private List<Message> messageList;
+
     //Constantes
     public static final int CONNECTION_ERROR = -1;
     public static final String FILTER_ALL = "ALL";
@@ -109,8 +112,9 @@ public class MainGeoActivity extends AppCompatActivity implements LocationListen
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-        //Inicializamos la lista de markers
+        //Inicializamos la lista de markers y messages
         markerList = new ArrayList<Marker>();
+        messageList = new ArrayList<Message>();
 
         //Iniciamos la búsqueda de localización
         getLocation(gestorLoc);
@@ -239,8 +243,18 @@ public class MainGeoActivity extends AppCompatActivity implements LocationListen
     public void markerFilter (String filter){
         switch (filter){
             case FILTER_ALL:
-                for (Marker marker: markerList){
+                for (Marker marker: markerList) {
                     marker.setVisible(true);
+                    /*
+                    //TODO Temporal hasta que el servidor solo nos envíe nuestros mensajes privados
+                    if (marker.isDraggable()) {
+                        marker.setVisible(true);
+
+                    } else if (messageList.get(Integer.valueOf(marker.getTitle())).getUserReceiver().equals(sharedPref.getString("user", ""))){
+                        marker.setVisible(true);
+                    }else
+                        marker.setVisible(false);
+                        */
                 }
                 break;
             case FILTER_PUBLIC:
@@ -256,6 +270,8 @@ public class MainGeoActivity extends AppCompatActivity implements LocationListen
                     if (marker.isDraggable()){
                         marker.setVisible(false);
                     }else
+                        //TODO Temporal hasta que el servidor solo nos envíe nuestros mensajes privados
+                    //if (messageList.get(Integer.valueOf(marker.getTitle())).getUserReceiver().equals(sharedPref.getString("user","")))
                         marker.setVisible(true);
                 }
                 break;
@@ -277,13 +293,9 @@ public class MainGeoActivity extends AppCompatActivity implements LocationListen
     public boolean onMarkerClick(Marker m){
         if (distanceMarkerToLocation(m,location)<=20){
             //ToDo start activity para leer el mensaje
+            Message temp = messageList.get(Integer.parseInt(m.getTitle()));
             Intent i = new Intent (this, MessageView.class);
-            editor.putString("textMessage",m.getTitle());
-            if (m.getSnippet()!=null) {
-                editor.putString("photo64", m.getSnippet());
-            }else
-                editor.putString("photo64", "EMPTY");
-            editor.commit();
+            i.putExtra("Message",temp);
             startActivity(i);
         }
         return true;
@@ -349,13 +361,12 @@ public class MainGeoActivity extends AppCompatActivity implements LocationListen
         if (location !=null){
             this.location = location;
             new serverLocationUpdate().execute();
-            //updateMyPosition(location);
         }
     }
 
 
     /**
-     * Función que aplica transparencia según la cercania al mensaje
+     * Función que modifica el icono de los mensajes según distancia
      * @param: localización
      */
     public void updateMarkers(Location location){
@@ -548,11 +559,12 @@ public class MainGeoActivity extends AppCompatActivity implements LocationListen
         protected void onPostExecute(final List<Message> result) {
             //TODO Gestionamos la respuesta del servidor
             if (result !=null) {
+                messageList = result;
                 if (result.size() > 0) {
                     markerList.clear();
                     mMap.clear();
                     for (Message temp : result) {
-                        createMarkerFromMessage(temp);
+                        createMarkerFromMessage(temp, result.indexOf(temp));
                     }
                 }
                 updateMarkers(location);
@@ -571,12 +583,17 @@ public class MainGeoActivity extends AppCompatActivity implements LocationListen
      * @param: message
      * @return: creará los markers del mapa
      */
-    public void createMarkerFromMessage (Message message){
+    public void createMarkerFromMessage (Message message, int posicion){
 
         Marker temp = mMap.addMarker(new MarkerOptions()
-                .position(new LatLng(message.getCoordY(), message.getCoordX())).snippet(message.getPhotoBase64()).draggable(message.isMsgPublic())
+                .position(new LatLng(message.getCoordY(), message.getCoordX()))
+                .draggable(message.isMsgPublic())
+                .title(String.valueOf(posicion))
+                .icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_geodesactived)));
+                //.snippet(message.getPhotoBase64())
+                //.title(formatMessage(message))
                 //.title(message.getText()).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
-                .title(formatMessage(message)).icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_geodesactived)));
+
         markerList.add(temp);
     }
 

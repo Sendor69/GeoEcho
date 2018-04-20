@@ -18,6 +18,7 @@ import android.support.constraint.ConstraintLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.text.InputFilter;
+import android.text.TextUtils;
 import android.util.Base64;
 import android.view.View;
 import android.widget.Button;
@@ -112,8 +113,10 @@ public class newMessage extends AppCompatActivity implements View.OnClickListene
                 addPhoto();
                 break;
             case send_message:
-                mensaje = generateMessage();
-                new placeMessage().execute();
+                if (checkDataMessage()) {
+                    mensaje = generateMessage();
+                    new placeMessage().execute();
+                }
                 break;
             case radio_private:
                 rbPublic.setChecked(false);
@@ -127,6 +130,30 @@ public class newMessage extends AppCompatActivity implements View.OnClickListene
                 break;
         }
     }
+
+    /**
+     * Función para validar los campos user y password.
+     * Los campos no pueden estar vacíos y han de contener más de 3 caracteres
+     */
+    public boolean checkDataMessage(){
+        Boolean validated = true;
+
+        if (rbPrivate.isChecked()){
+            if (TextUtils.isEmpty(messagePrivateUser.getText())){
+                messagePrivateUser.setError("User required");
+                messagePrivateUser.requestFocus();
+                validated = false;
+            }
+        }
+        if (TextUtils.isEmpty(messageText.getText())) {
+            messageText.setError("Message can't be empty");
+            messageText.requestFocus();
+            validated = false;
+        }
+        return validated;
+    }
+
+
     /**
      * Función que genera un objeto Message con los datos necesarios, obtenidos del usuario
      * @param: introdución del user
