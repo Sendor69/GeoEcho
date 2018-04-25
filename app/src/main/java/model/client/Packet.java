@@ -1,11 +1,15 @@
+/*
+ * App GeoEcho (Projecte final M13-DAM al IOC)
+ * Copyright (c) 2018 - Papaya Team
+ */
 package model.client;
 
 import java.io.Serializable;
 
 /**
- * Created by Dani on 05/03/2018.
+ * Super Classe abstracta de tota la resta del model de dades a empaquetar en les comunicacions
+ * @author Dani Machado
  */
-
 public abstract class Packet implements Serializable{
 
     private int sessionID;

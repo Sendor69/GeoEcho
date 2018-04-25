@@ -1,11 +1,16 @@
+/*
+ * App GeoEcho (Projecte final M13-DAM al IOC)
+ * Copyright (c) 2018 - Papaya Team
+ */
+
 package model.client;
 
 import java.util.List;
 
 /**
- * Created by Dani on 05/04/2018.
+ * Classe abstracta ResponseQuery que embolcalla la resposta del servidor als clients
+ * @author Dani Machado
  */
-
 public abstract class ResponseQuery extends Response{
 
     private List<Message> messageList;

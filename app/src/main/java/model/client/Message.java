@@ -1,8 +1,9 @@
-package model.client;
-
-/**
- * Created by Dani on 03/04/2018.
+/*
+ * App GeoEcho (Projecte final M13-DAM al IOC)
+ * Copyright (c) 2018 - Papaya Team
  */
+
+package model.client;
 
 import java.util.Date;
 

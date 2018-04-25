@@ -1,9 +1,13 @@
+/*
+ * App GeoEcho (Projecte final M13-DAM al IOC)
+ * Copyright (c) 2018 - Papaya Team
+ */
 package model.client;
 
 /**
- * Created by Dani on 05/03/2018.
+ * Classe de resposta del servidor del model dades a empaquetar en les comunicacions
+ * @author Dani Machado
  */
-
 public class Response extends Packet{
 
     /**
@@ -70,6 +74,16 @@ public class Response extends Packet{
      * Constant de SESSION_FAILED
      */
     public static final int SESSION_FAILED = 12;
+
+    /**
+     * Constant de UPDATE_USER_OK
+     */
+    public static final int UPDATE_USER_OK = 13;
+
+    /**
+     * Constant de UPDATE_USER_FAILED
+     */
+    public static final int UPDATE_USER_FAILED = 14;
 
     /**
      * Atribut statusQuery

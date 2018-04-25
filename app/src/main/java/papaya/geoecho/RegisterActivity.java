@@ -15,10 +15,13 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
+import org.apache.http.conn.ssl.AllowAllHostnameVerifier;
+
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.net.HttpURLConnection;
 import java.net.URL;
+
+import javax.net.ssl.HttpsURLConnection;
 
 import model.client.RegisterApp;
 import model.client.Response;
@@ -197,10 +200,13 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
      */
     public Response validateRegister(RegisterApp data) throws Exception{
 
-        String serverUrl = "http://ec2-52-31-205-76.eu-west-1.compute.amazonaws.com/geoechoserv";
+        String serverUrl = "https://ec2-52-31-205-76.eu-west-1.compute.amazonaws.com:8443/geoechoserv";
         Response result = new Response();
         URL url = new URL(serverUrl);
-        HttpURLConnection con = (HttpURLConnection) url.openConnection();
+        HttpsURLConnection con = (HttpsURLConnection) url.openConnection();
+        con.setSSLSocketFactory(CustomSSLSocketFactory.getSSLSocketFactory(RegisterActivity.this));
+        con.setHostnameVerifier(new AllowAllHostnameVerifier());
+
         String user = data.getUser();
         String pass = data.getPass();
         String mail = data.getMail();

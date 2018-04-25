@@ -1,9 +1,13 @@
+/*
+ * App GeoEcho (Projecte final M13-DAM al IOC)
+ * Copyright (c) 2018 - Papaya Team
+ */
 package model.client;
 
 /**
- * Created by Dani on 06/03/2018.
+ * Classe RegisterApp per registrar usuaris al sistema a través de l'App del model de dades de comunicacions
+ * @author Dani Machado
  */
-
 public class RegisterApp extends Packet {
     private String user;
     private String pass;

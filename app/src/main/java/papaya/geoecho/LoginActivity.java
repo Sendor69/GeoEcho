@@ -16,10 +16,13 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import org.apache.http.conn.ssl.AllowAllHostnameVerifier;
+
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.net.HttpURLConnection;
 import java.net.URL;
+
+import javax.net.ssl.HttpsURLConnection;
 
 import model.client.LoginApp;
 import model.client.Response;
@@ -206,10 +209,12 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
      * @return: devolverá un objeto Response
      */
     public Response serverLogin (LoginApp data) throws Exception{
-        String serverUrl = "http://ec2-52-31-205-76.eu-west-1.compute.amazonaws.com/geoechoserv";
+        String serverUrl = "https://ec2-52-31-205-76.eu-west-1.compute.amazonaws.com:8443/geoechoserv";
         Response result = new Response();
         URL url = new URL(serverUrl);
-        HttpURLConnection con = (HttpURLConnection) url.openConnection();
+        HttpsURLConnection con = (HttpsURLConnection) url.openConnection();
+        con.setSSLSocketFactory(CustomSSLSocketFactory.getSSLSocketFactory(LoginActivity.this));
+        con.setHostnameVerifier(new AllowAllHostnameVerifier());
 
         //add request header
         con.setRequestMethod("POST");

@@ -28,16 +28,19 @@ import android.widget.RadioButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.apache.http.conn.ssl.AllowAllHostnameVerifier;
+
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+
+import javax.net.ssl.HttpsURLConnection;
 
 import model.client.Message;
 import model.client.Response;
@@ -306,10 +309,13 @@ public class newMessage extends AppCompatActivity implements View.OnClickListene
      * @return: devolverá un objeto Response para saber si se ha podido enviar correctamente
      */
     public Response messageToServer (Message data) throws Exception{
-        String serverUrl = "http://ec2-52-31-205-76.eu-west-1.compute.amazonaws.com/geoechoserv";
+        //String serverUrl = "http://ec2-52-31-205-76.eu-west-1.compute.amazonaws.com/geoechoserv";
+        String serverUrl = "https://ec2-52-31-205-76.eu-west-1.compute.amazonaws.com:8443/geoechoserv";
         Response result = new Response();
         URL url = new URL(serverUrl);
-        HttpURLConnection con = (HttpURLConnection) url.openConnection();
+        HttpsURLConnection con = (HttpsURLConnection) url.openConnection();
+        con.setSSLSocketFactory(CustomSSLSocketFactory.getSSLSocketFactory(newMessage.this));
+        con.setHostnameVerifier(new AllowAllHostnameVerifier());
         data.setSessionID(sharedPref.getInt("session",0));
 
         //add request header

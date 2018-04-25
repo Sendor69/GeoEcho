@@ -1,8 +1,14 @@
+/*
+ * App GeoEcho (Projecte final M13-DAM al IOC)
+ * Copyright (c) 2018 - Papaya Team
+ */
+
 package model.client;
 
 /**
- * Created by Dani on 05/04/2018.
+ * Classe QueryApp que embolcalla les sol·licituds dels client App al servidor
+ * @author Dani Machado
  */
+public class QueryApp extends Query{
 
-public class QueryApp extends Query {
 }

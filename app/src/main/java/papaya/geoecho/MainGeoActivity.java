@@ -35,12 +35,15 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import org.apache.http.conn.ssl.AllowAllHostnameVerifier;
+
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.net.ssl.HttpsURLConnection;
 
 import model.client.Logout;
 import model.client.Message;
@@ -504,10 +507,12 @@ public class MainGeoActivity extends AppCompatActivity implements LocationListen
      */
     public Response serverLogout ( Logout data) throws Exception{
 
-        String serverUrl = "http://ec2-52-31-205-76.eu-west-1.compute.amazonaws.com/geoechoserv";
+        String serverUrl = "https://ec2-52-31-205-76.eu-west-1.compute.amazonaws.com:8443/geoechoserv";
         Response result = new Response();
         URL url = new URL(serverUrl);
-        HttpURLConnection con = (HttpURLConnection) url.openConnection();
+        HttpsURLConnection con = (HttpsURLConnection) url.openConnection();
+        con.setSSLSocketFactory(CustomSSLSocketFactory.getSSLSocketFactory(MainGeoActivity.this));
+        con.setHostnameVerifier(new AllowAllHostnameVerifier());
 
         //add request header
         con.setRequestMethod("POST");
@@ -560,9 +565,9 @@ public class MainGeoActivity extends AppCompatActivity implements LocationListen
             //TODO Gestionamos la respuesta del servidor
             if (result !=null) {
                 messageList = result;
+                markerList.clear();
+                mMap.clear();
                 if (result.size() > 0) {
-                    markerList.clear();
-                    mMap.clear();
                     for (Message temp : result) {
                         createMarkerFromMessage(temp, result.indexOf(temp));
                     }
@@ -614,7 +619,7 @@ public class MainGeoActivity extends AppCompatActivity implements LocationListen
      * @return: objeto Response para verificar que el logout es correcto
      */
     public List<Message> updateServerMessageList (Location location) throws Exception{
-        String serverUrl = "http://ec2-52-31-205-76.eu-west-1.compute.amazonaws.com/geoechoserv";
+        String serverUrl = "https://ec2-52-31-205-76.eu-west-1.compute.amazonaws.com:8443/geoechoserv";
         ResponseQueryApp response = null;
         List<Message> lista = new ArrayList<Message>();
 
@@ -625,7 +630,9 @@ public class MainGeoActivity extends AppCompatActivity implements LocationListen
         //data.setSessionID(1123259813);
 
         URL url = new URL(serverUrl);
-        HttpURLConnection con = (HttpURLConnection) url.openConnection();
+        HttpsURLConnection con = (HttpsURLConnection) url.openConnection();
+        con.setSSLSocketFactory(CustomSSLSocketFactory.getSSLSocketFactory(MainGeoActivity.this));
+        con.setHostnameVerifier(new AllowAllHostnameVerifier());
 
         //add request header
         con.setRequestMethod("POST");

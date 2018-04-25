@@ -1,9 +1,13 @@
+/*
+ * App GeoEcho (Projecte final M13-DAM al IOC)
+ * Copyright (c) 2018 - Papaya Team
+ */
 package model.client;
 
 /**
- * Created by Dani on 07/03/2018.
+ * Classe abstracta login per entrar al sistema del model de dades a empaquetar en les comunicacions
+ * @author Dani Machado
  */
-
 public abstract class Login extends Packet{
 
     private String user;
