@@ -650,6 +650,7 @@ public class MainGeoActivity extends AppCompatActivity implements LocationListen
                 //lista = (List<Message>) objectInput.readObject();
             }
         }catch (Exception e){
+            System.out.println(e);
         }
 
         return lista;

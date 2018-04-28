@@ -231,4 +231,13 @@ public class Message extends Packet {
         this.msgReaded = msgReaded;
     }
 
+    /**
+     * toString del message
+     * @return String amb les dades
+     */
+    @Override
+    public String toString() {
+        return "Message{" + "coordX=" + coordX + ", coordY=" + coordY + ", text=" + text + ", photoBase64=" + photoBase64 + ", userSender=" + userSender + ", userReceiver=" + userReceiver + ", date=" + date + ", life=" + life + ", msgPublic=" + msgPublic + ", msgVisible=" + msgVisible + ", msgReaded=" + msgReaded + '}';
+    }
+
 }
