@@ -86,6 +86,11 @@ public class Response extends Packet{
     public static final int UPDATE_USER_FAILED = 14;
 
     /**
+     * Constant de USER_BANNED
+     */
+    public static final int USER_BANNED = 15;
+
+    /**
      * Atribut statusQuery
      */
     private int statusQuery;

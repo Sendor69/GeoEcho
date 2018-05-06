@@ -76,7 +76,6 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 }
                 break;
             case tRecordar:
-                //ToDO por implementar
                 break;
         }
 
@@ -88,8 +87,6 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
      */
 
     public class UserLoginTask extends AsyncTask<Void, Void, Response> {
-
-        /*Clase tonta, no hace nada */
 
         ProgressDialog mDialog = new ProgressDialog(LoginActivity.this);
 
@@ -116,6 +113,9 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             //Gestionamos la respuesta del servidor
             if (status == result.LOGIN_FAILED){
                 showAlert("Authentication", "User or password are incorrects");
+
+            }else if (status == result.USER_BANNED){
+                showAlert("Banned", "This user has been permanently banned");
 
             }else if (status == result.LOGIN_OK){
                 loginData.setSessionID(result.getSessionID());

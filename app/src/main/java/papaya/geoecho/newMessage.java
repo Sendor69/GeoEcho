@@ -23,7 +23,6 @@ import android.util.Base64;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.RadioButton;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -65,10 +64,6 @@ public class newMessage extends AppCompatActivity implements View.OnClickListene
     private Message mensaje;
     private ConstraintLayout l_privateUser;
 
-
-    //Test
-    private ImageView imagen;
-
     //Path imagen
     private String dir;
 
@@ -94,7 +89,6 @@ public class newMessage extends AppCompatActivity implements View.OnClickListene
         photoAdded = (TextView)findViewById(R.id.image_added);
         messageText = (EditText)findViewById(R.id.text_message);
         messagePrivateUser = (EditText)findViewById(R.id.text_sendTo);
-        imagen = (ImageView) findViewById(R.id.photo_added);
 
         //Limitamos el texto a 255 characteres para que entre en la base de datos
         InputFilter[] FilterArray = new InputFilter[1];

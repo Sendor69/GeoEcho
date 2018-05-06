@@ -248,16 +248,6 @@ public class MainGeoActivity extends AppCompatActivity implements LocationListen
             case FILTER_ALL:
                 for (Marker marker: markerList) {
                     marker.setVisible(true);
-                    /*
-                    //TODO Temporal hasta que el servidor solo nos envíe nuestros mensajes privados
-                    if (marker.isDraggable()) {
-                        marker.setVisible(true);
-
-                    } else if (messageList.get(Integer.valueOf(marker.getTitle())).getUserReceiver().equals(sharedPref.getString("user", ""))){
-                        marker.setVisible(true);
-                    }else
-                        marker.setVisible(false);
-                        */
                 }
                 break;
             case FILTER_PUBLIC:
@@ -273,8 +263,6 @@ public class MainGeoActivity extends AppCompatActivity implements LocationListen
                     if (marker.isDraggable()){
                         marker.setVisible(false);
                     }else
-                        //TODO Temporal hasta que el servidor solo nos envíe nuestros mensajes privados
-                    //if (messageList.get(Integer.valueOf(marker.getTitle())).getUserReceiver().equals(sharedPref.getString("user","")))
                         marker.setVisible(true);
                 }
                 break;
@@ -295,7 +283,6 @@ public class MainGeoActivity extends AppCompatActivity implements LocationListen
     @Override
     public boolean onMarkerClick(Marker m){
         if (distanceMarkerToLocation(m,location)<=20){
-            //ToDo start activity para leer el mensaje
             Message temp = messageList.get(Integer.parseInt(m.getTitle()));
             Intent i = new Intent (this, MessageView.class);
             i.putExtra("Message",temp);
@@ -550,7 +537,6 @@ public class MainGeoActivity extends AppCompatActivity implements LocationListen
         protected List<Message> doInBackground(Void... params) {
             List<Message> result = new ArrayList<Message>();
             try {
-                //TODO conexión con el servidor
                 result=  updateServerMessageList(location);
 
             } catch (Exception e) {
@@ -562,7 +548,6 @@ public class MainGeoActivity extends AppCompatActivity implements LocationListen
 
         @Override
         protected void onPostExecute(final List<Message> result) {
-            //TODO Gestionamos la respuesta del servidor
             if (result !=null) {
                 messageList = result;
                 markerList.clear();
